@@ -1,0 +1,26 @@
+{
+  "name": "G4-3: Grand Finale (All Mechanics Combined)",
+  "difficulty": "4_combined",
+  "grid": [
+    [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0],
+    [1, 1, 1, 2, 2, 1, 0, 1, 1, 1, 1, 0, 0, 0],
+    [1, 1, 1, 2, 2, 1, 0, 0, 0, 1, 1, 2, 2, 1],
+    [1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 2, 2, 1],
+    [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1],
+    [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 1],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [0, 0, 0, 0, 0, 0, 0, 9, 2, 2, 1, 2, 2, 1],
+    [0, 0, 0, 0, 0, 0, 0, 1, 2, 2, 1, 2, 2, 1]
+  ],
+  "start": [1, 0],
+  "goal": [7, 7],
+  "bridges": {
+    "B1": { "cells": [[2, 9], [3, 9]], "initial_state": false },
+    "B2": { "cells": [[5, 13], [6, 13]], "initial_state": false }
+  },
+  "switches": [
+    { "pos": [1, 5], "type": "split", "teleport_to": [[0, 7], [5, 7]] },
+    { "pos": [0, 10], "type": "soft", "behavior": "permanent", "target_bridges": ["B1"], "fixed_state": true },
+    { "pos": [4, 13], "type": "heavy", "behavior": "permanent", "target_bridges": ["B2"], "fixed_state": true }
+  ]
+}

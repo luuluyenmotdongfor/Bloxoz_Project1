@@ -7,7 +7,7 @@ SPLIT_ACTIONS = ["UP", "DOWN", "LEFT", "RIGHT", "SWITCH_CUBE"]
 
 class Board:
     def __init__(self, json_path: str):
-        with open(json_path, "r", encoding="utf-8") as f:
+        with open(json_path, "r", encoding="utf-8-sig") as f:
             data = json.load(f)
 
         self.name = data.get("name", "Unnamed Level")

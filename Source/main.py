@@ -2,24 +2,44 @@ import os
 import sys
 from flask import Flask, jsonify, request, send_from_directory
 
-# Đảm bảo Python luôn tìm thấy thư mục core và solvers dù chạy lệnh từ đâu
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, BASE_DIR)
 
 from core.board import Board
 from core.state import State, Orientation
 from solvers.bfs_solver import BFSSolver
-# Khi nhóm code xong 3 thuật toán còn lại thì mở comment 3 dòng dưới:
-# from solvers.dfs_solver import DFSSolver
-# from solvers.ucs_solver import UCSSolver
-# from solvers.astar_solver import AStarSolver
 
 app = Flask(__name__, static_folder=os.path.join(BASE_DIR, "gui"))
 LEVELS_DIR = os.path.join(BASE_DIR, "levels")
 
 
+def get_available_solvers():
+    """Tự động nạp các thuật toán đã được thành viên cài đặt mà không cần sửa main.py."""
+    solvers = {"bfs": BFSSolver}
+    try:
+        from solvers.dfs_solver import DFSSolver
+        solvers["dfs"] = DFSSolver
+    except Exception:
+        pass
+    try:
+        from solvers.ids_solver import IDSSolver
+        solvers["ids"] = IDSSolver
+    except Exception:
+        pass
+    try:
+        from solvers.ucs_solver import UCSSolver
+        solvers["ucs"] = UCSSolver
+    except Exception:
+        pass
+    try:
+        from solvers.astar_solver import AStarSolver
+        solvers["astar"] = AStarSolver
+    except Exception:
+        pass
+    return solvers
+
+
 def state_to_dict(state: State, board: Board):
-    """Chuyển đối tượng State của Python sang JSON để GUI 3D vẽ lên màn hình."""
     return {
         "r": state.r,
         "c": state.c,
@@ -69,7 +89,6 @@ def load_level(filename):
 
 @app.route("/api/move", methods=["POST"])
 def manual_move():
-    """API xử lý khi người chơi bấm phím mũi tên / Space trên bàn phím."""
     data = request.json
     board = Board(os.path.join(LEVELS_DIR, data["level"]))
     s = data["state"]
@@ -100,28 +119,19 @@ def manual_move():
 
 @app.route("/api/solve", methods=["POST"])
 def solve_level():
-    """API chạy thuật toán tìm kiếm và trả về lộ trình lăn khối từ đầu tới đích."""
     data = request.json
     level_file = data["level"]
     algo = data.get("algo", "bfs").lower()
 
     board = Board(os.path.join(LEVELS_DIR, level_file))
-
-    solver_map = {
-        "bfs": BFSSolver,
-        # Mở comment khi các bạn trong nhóm code xong:
-        # "dfs": DFSSolver,
-        # "ucs": UCSSolver,
-        # "astar": AStarSolver,
-    }
+    solver_map = get_available_solvers()
 
     if algo not in solver_map:
-        return jsonify({"error": f"Thuật toán '{algo.upper()}' đang được thành viên nhóm cài đặt!"}), 400
+        return jsonify({"error": f"Thuật toán '{algo.upper()}' chưa được cài đặt hoặc file đang trống!"}), 400
 
     solver = solver_map[algo](board)
     result = solver.solve()
 
-    # Dựng lại danh sách các trạng thái liên tiếp để GUI 3D tự động lăn khối tới đích
     trace = []
     if result["solved"]:
         curr = board.get_initial_state()
