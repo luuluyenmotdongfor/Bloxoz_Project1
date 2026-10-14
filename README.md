@@ -1,154 +1,119 @@
-$readme = @'
 # 🟦 ĐỒ ÁN 1: BLOXORZ SOLVER (CSC14003 - CƠ SỞ TRÍ TUỆ NHÂN TẠO)
 
-> **LƯU Ý DÀNH CHO THÀNH VIÊN NHÓM & CÔNG CỤ AI (GEMINI / CHATGPT):**
-> File `README.md` này là tài liệu đặc tả kỹ thuật và phân công công việc chính thức của nhóm. Nếu bạn sử dụng AI để hỗ trợ viết code hoặc viết báo cáo, **hãy copy toàn bộ nội dung file này gửi cho AI trước** để AI hiểu chính xác kiến trúc code có sẵn của nhóm, tuyệt đối không tự ý sửa đổi các file trong thư mục `Source/core/`.
+> **📌 THÔNG BÁO MỚI NHẤT TỪ TRƯỞNG NHÓM (CẬP NHẬT TIẾN ĐỘ):**
+> Hiện tại toàn bộ **Core Logic (kể cả cơ chế khó nhất là Split Switch tách/gộp khối)**, **Bộ 12 màn chơi chuẩn (4 cấp độ khó)**, **Script tự động chấm & vẽ biểu đồ (`benchmark.py`)**, và **Thuật toán mẫu `BFS`** đã hoàn thiện 100%.
+> 
+> ⚠️ **QUY TẮC GIT BẮT BUỘC:** Anh em tuyệt đối **KHÔNG push thẳng lên nhánh `main`**. Mỗi người tự tạo branch riêng cho phần việc của mình, code và chạy test kỹ bằng lệnh `python Source/benchmark.py`, sau đó push lên branch riêng và báo Trưởng nhóm (hoặc thành viên khác) kiểm tra rồi mới merge vào `main`!
 
 ---
 
-## 1. TỔNG QUAN YÊU CẦU & TIÊU CHÍ CHẤM ĐIỂM (TỪ ĐỀ BÀI & Q&A CỦA THẦY)
+## 1. TRẠNG THÁI HIỆN TẠI CỦA DỰ ÁN (ĐÃ XONG vs. CẦN LÀM)
 
-* **Trọng tâm đồ án (100 điểm):**
-  * **Game & GUI 3D (20 điểm):** 10 điểm Core mechanics (gạch thường, ô trống, lỗ đích, lăn khối 3 trạng thái) + 10 điểm Advanced tiles (ô dễ vỡ Fragile tile, cầu Bridges, 3 loại công tắc Soft/Heavy/Split switch). Thầy yêu cầu **GUI phải là 3D** và **khi bấm nút Solve thì khối sắt tự động lăn đến đích**.
-  * **4 Thuật toán tìm kiếm (40 điểm):** BFS (10đ), DFS hoặc IDS (10đ), UCS (10đ), A* (10đ) bắt buộc cài đặt bằng **Python**.
-  * **Báo cáo Report (30 điểm):** Phân công nhiệm vụ (% hoàn thành), mô tả thuật toán & mô hình hóa bài toán (10đ), chạy thực nghiệm trên **tối thiểu 10 test cases** chia theo độ khó, lập bảng và vẽ biểu đồ so sánh 4 thông số: *Search Time, Peak Memory Usage, Expanded Nodes, Solution Length* (20đ). Báo cáo thống nhất 1 ngôn ngữ (100% Tiếng Việt hoặc 100% Tiếng Anh).
-  * **Video Demo YouTube (10 điểm):** Quay giao diện 3D, chơi thủ công và chạy các Solver có phụ đề/thuyết minh.
-* **Quy định sử dụng AI & Vấn đáp:** Được phép dùng AI và dùng source/test case có sẵn nhưng **phải trích dẫn (cite) nguồn và lưu lại các câu Prompt đã dùng vào phần Appendix (Phụ lục) của báo cáo**. Giảng viên có quyền gọi vấn đáp ngẫu nhiên để kiểm tra hiểu biết về thuật toán.
-
----
-
-## 2. TRẠNG THÁI HIỆN TẠI CỦA DỰ ÁN (ĐÃ LÀM XONG vs. CẦN LÀM TIẾP)
-
-Trưởng nhóm đã xây dựng xong toàn bộ **Bộ khung lõi (Core Logic)**, **Khung đo đạc thuật toán**, **Thuật toán mẫu BFS**, và **Giao diện Web 3D cơ bản**. Dưới đây là trạng thái từng file:
-
-| Đường dẫn File | Trạng thái | Mô tả chi tiết |
+| Thành phần / Đường dẫn File | Trạng thái | Chi tiết công việc |
 | :--- | :---: | :--- |
-| `Source/core/state.py` | ✅ **ĐÃ XONG 100%** | Định nghĩa class `State` bất biến (hashable) lưu tọa độ, hướng khối (`STANDING`, `LYING_H`, `LYING_V`, `SPLIT`) và trạng thái đóng/mở của toàn bộ cầu (`bridges_mask`). **Không cần sửa.** |
-| `Source/core/board.py` | ✅ **ĐÃ XONG 100%** | Đọc file JSON map, kiểm tra nước đi hợp lệ (rơi xuống Void, vỡ gạch cam Fragile, cầu đóng), xử lý đủ 3 công tắc (Soft, Heavy, Split tách/gộp khối). **Không cần sửa.** |
-| `Source/solvers/base_solver.py` | ✅ **ĐÃ XONG 100%** | Class cha tự động bấm giờ (`Search Time`), đo đỉnh bộ nhớ (`Peak Memory` bằng `tracemalloc`), đếm `Expanded Nodes` và `Solution Length`. **Không cần sửa.** |
-| `Source/solvers/bfs_solver.py` | ✅ **ĐÃ XONG 100%** | Thuật toán BFS hoàn chỉnh. Dùng làm code mẫu chuẩn cho các thuật toán còn lại. |
-| `Source/main.py` | 🔄 **XONG 80%** | Server Flask kết nối Python với GUI 3D. Đã nối sẵn BFS. Khi code xong DFS, UCS, A* chỉ cần bỏ dấu `#` ở dòng import là chạy. |
-| `Source/gui/index.html` | 🚧 **CẦN NÂNG CẤP** | Giao diện 3D (`Three.js`) đã chạy được: vẽ bản đồ, chơi bằng phím mũi tên, bấm `Solve BFS` tự lăn khối về đích. **Cần làm đẹp thêm** (vẽ viền khối, xoay camera bằng chuột, hiệu ứng lăn mượt). |
-| `Source/levels/` | 🚧 **CẦN BỔ SUNG** | Mới chỉ có `level_01.json` để test. **Cần tạo đủ tối thiểu 10–12 file JSON map** chia làm 4 nhóm độ khó. |
-| `Source/solvers/dfs_solver.py` | ❌ **ĐANG TRỐNG** | Cần viết thuật toán `DFSSolver` (hoặc `IDSSolver`) kế thừa từ `BaseSolver`. |
-| `Source/solvers/ucs_solver.py` | ❌ **ĐANG TRỐNG** | Cần viết thuật toán `UCSSolver` + Thiết kế hàm chi phí (Cost function) không đồng nhất. |
-| `Source/solvers/astar_solver.py` | ❌ **ĐANG TRỐNG** | Cần viết thuật toán `AStarSolver` + Thiết kế hàm Heuristic đảm bảo tính Admissible. |
-| `Source/benchmark.py` | ❌ **ĐANG TRỐNG** | Cần viết script tự động chạy cả 4 thuật toán trên toàn bộ 10+ map để xuất bảng số liệu & vẽ biểu đồ `matplotlib` đưa vào Report. |
+| `Source/core/state.py` | ✅ **ĐÃ XONG 100%** | Định nghĩa `State` bất biến (hashable) lưu tọa độ, 4 trạng thái hướng (`STANDING`, `LYING_H`, `LYING_V`, `SPLIT`) và trạng thái cầu (`bridges_mask`). **Không sửa.** |
+| `Source/core/board.py` | ✅ **ĐÃ XONG 100%** | Xử lý toàn bộ luật chơi: gạch thường, ô trống, gạch cam dễ vỡ (`Fragile`), cầu đóng/mở, và cả 3 loại công tắc (`soft`, `heavy`, `split` tách 2 khối đơn & tự động ghép lại khi đứng cạnh nhau). **Không sửa.** |
+| `Source/solvers/base_solver.py` | ✅ **ĐÃ XONG 100%** | Class cha tự động đo 4 thông số: `Search Time`, `Peak Memory Usage`, `Expanded Nodes`, `Solution Length`. **Không sửa.** |
+| `Source/main.py` | ✅ **ĐÃ XONG 100%** | Server Flask kết nối Web 3D. **Đã cập nhật cơ chế tự động nhận diện thuật toán** (ai code xong file solver nào là server tự nạp, không cần sửa `main.py`). |
+| `Source/levels/level_01..12.json` | ✅ **ĐÃ XONG 100%** | Đã tạo đủ **12 màn chơi chuẩn** chia đều vào 4 nhóm độ khó tăng dần (từ 7 bước đến 31 bước, mở rộng >1000 nodes). Có thể dùng luôn hoặc bổ sung thêm nếu muốn. |
+| `Source/validate_levels.py` | ✅ **ĐÃ XONG 100%** | Công cụ tự động kiểm tra toàn bộ file JSON map xem có hợp lệ và giải được (`SOLVABLE`) hay không. |
+| `Source/benchmark.py` | ✅ **ĐÃ XONG 100%** | Script tự động chạy tất cả các thuật toán trên 12 map, kiểm tra tính đúng đắn của lời giải, xuất file `benchmark_results.csv` và vẽ 4 biểu đồ `.png` vào `Source/results/`. |
+| `Source/solvers/bfs_solver.py` | ✅ **ĐÃ XONG 100%** | Thuật toán `BFSSolver` hoàn chỉnh. Dùng làm file mẫu chuẩn cho các bạn code thuật toán khác. |
+| `Source/solvers/dfs_solver.py` | ❌ **CẦN LÀM** | Cài đặt `class DFSSolver(BaseSolver)` sử dụng Stack và tập `visited` tránh lặp chu trình. |
+| `Source/solvers/ids_solver.py` | ❌ **CẦN LÀM** | Cài đặt `class IDSSolver(BaseSolver)` (Iterative Deepening Search) tìm kiếm lặp sâu dần. |
+| `Source/solvers/ucs_solver.py` | ❌ **CẦN LÀM** | Cài đặt `class UCSSolver(BaseSolver)` dùng `heapq` với hàm Cost không đồng nhất (quy ước ở Mục 4.4). |
+| `Source/solvers/astar_solver.py` | ❌ **CẦN LÀM** | Cài đặt `class AStarSolver(BaseSolver)` dùng `heapq` với hàm Heuristic đảm bảo tính Admissible (xử lý cả cổng dịch chuyển `split`). |
+| `Source/gui/index.html` | 🚧 **CẦN NÂNG CẤP** | Giao diện 3D đã chạy và test được hết mọi tính năng (kể cả tách khối). Bạn phụ trách GUI cần làm đẹp thêm (xoay camera bằng chuột `OrbitControls`, vẽ viền khối, làm mượt chuyển động lăn, thêm nút bấm `Solve IDS`). |
+| `Report.pdf` & `Video Demo` | ❌ **CẦN LÀM** | Viết báo cáo lý thuyết + phân tích thực nghiệm (30 điểm) và quay Video Demo up YouTube (10 điểm). |
 
 ---
 
-## 3. HƯỚNG DẪN CHẠY TEST THỬ & CÁCH TẮT CHƯƠNG TRÌNH
-
-Ngay sau khi tải dự án về máy, mọi thành viên hãy làm theo 3 bước sau để kiểm tra bộ khung:
+## 2. HƯỚNG DẪN CHẠY TEST NHANH (BAO GỒM CẢ TEST TÁCH KHỐI SPLIT)
 
 ### Bước 1: Cài đặt thư viện
-Mở Terminal trong VS Code (`Ctrl + ~`) tại thư mục gốc và chạy:
 ~~~bash
 pip install -r requirements.txt
 ~~~
 
-### Bước 2: Khởi chạy chương trình
+### Bước 2: Kiểm tra 12 màn chơi & Chạy thử Benchmark
+~~~bash
+python Source/validate_levels.py
+python Source/benchmark.py
+~~~
+*(Sau khi chạy `benchmark.py`, mở thư mục `Source/results/` sẽ thấy bảng số liệu `.csv` và 4 ảnh biểu đồ `.png` được xuất tự động).*
+
+### Bước 3: Chạy Giao diện 3D trên trình duyệt
 ~~~bash
 python Source/main.py
 ~~~
-Khi Terminal hiện dòng `🚀 Khởi chạy Bloxorz 3D tại địa chỉ: [http://127.0.0.1:5000](http://127.0.0.1:5000)`, hãy mở trình duyệt (Chrome/Edge) truy cập vào: **`[http://127.0.0.1:5000](http://127.0.0.1:5000)`**.
-* **Test chơi bằng tay:** Bấm các phím mũi tên `Lên`, `Xuống`, `Trái`, `Phải` để lăn khối sắt.
-* **Test thuật toán mẫu:** Bấm nút **`Solve BFS`** ở góc trái, quan sát thông số đo đạc hiện ra và khối sắt tự động lăn qua công tắc, mở cầu, đi qua gạch cam về đích.
-
-### Bước 3: Cách tắt chương trình
-Để dừng server đang chạy, bấm chuột vào cửa sổ **Terminal** trong VS Code và nhấn tổ hợp phím **`Ctrl + C`**.
+Mở trình duyệt truy cập: **`http://127.0.0.1:5000`**
+* **Cách test cơ chế Split Switch (Tách khối 1x1x2 thành 2 khối 1x1x1):**
+  * Chọn màn **`level_10.json`**, **`level_11.json`**, hoặc **`level_12.json`** ở menu góc trái.
+  * Bấm nút **`Solve BFS`** để xem AI tự động lăn vào công tắc màu tím, tách thành 2 khối vuông nhỏ (xanh đậm & xanh nhạt), điều khiển từng khối đi bấm công tắc mở cầu rồi tự ghép lại thành khối lớn về đích.
+  * Nếu chơi bằng tay: Dùng phím `Mũi tên` để di chuyển, bấm phím **`Space`** để đổi qua lại giữa 2 khối nhỏ.
+* **Cách tắt chương trình:** Bấm vào cửa sổ Terminal đang chạy và nhấn **`Ctrl + C`**.
 
 ---
 
-## 4. ĐẶC TẢ KỸ THUẬT ("HỢP ĐỒNG CODE" DÀNH CHO NGƯỜI CODE & AI)
+## 3. CẤU TRÚC BỘ 12 MÀN CHƠI (4 CẤP ĐỘ KHÓ TRONG `Source/levels/`)
 
-Để code của các thành viên ghép vào nhau chạy ngay lập tức, mọi người cần tuân thủ cấu trúc các hàm có sẵn sau:
+Bộ 12 test cases đã được thiết kế dựa trên các màn kinh điển của Bloxorz gốc (Coolmath Games) và chia thành 4 nhóm để phục vụ phần phân tích thực nghiệm trong Report:
+1. **Nhóm 1 - Cơ bản (`level_01` -> `level_03`):** Chỉ gồm gạch thường (`1`), ô trống (`0`) và đích (`9`). Độ dài lời giải tối ưu từ 7 đến 31 bước.
+2. **Nhóm 2 - Ô dễ vỡ Fragile Tiles (`level_04` -> `level_06`):** Có thêm gạch màu cam (`2` - đứng thẳng sẽ bị vỡ). Đặc biệt **`level_05.json`** được thiết kế có 1 đường tắt đi qua gạch cam (8 bước) và 1 đường vòng đi trên gạch cứng an toàn (16 bước) để làm nổi bật sự khác biệt giữa **BFS** và **UCS**.
+3. **Nhóm 3 - Cầu & Công tắc (`level_07` -> `level_09`):** Kết hợp nhiều cầu đóng/mở (`bridges`) với công tắc tròn (`soft` switch) và công tắc chữ X (`heavy` switch).
+4. **Nhóm 4 - Kết hợp & Tách khối Split Switch (`level_10` -> `level_12`):** Kết hợp đầy đủ gạch cam, cầu, công tắc `soft`/`heavy` và cổng dịch chuyển tách khối `split`.
 
-### 4.1. Cấu trúc đối tượng `State` (`Source/core/state.py`)
-Mỗi trạng thái `state` có các thuộc tính:
-* `state.r`, `state.c`: Tọa độ dòng, cột của khối (nếu nằm ngang thì chiếm `(r, c)` và `(r, c+1)`; nếu nằm dọc thì chiếm `(r, c)` và `(r+1, c)`).
-* `state.orientation`: Kiểu `Orientation` gồm:
-  * `Orientation.STANDING` (0): Đứng thẳng tại 1 ô.
-  * `Orientation.LYING_H` (1): Nằm ngang.
-  * `Orientation.LYING_V` (2): Nằm dọc.
-  * `Orientation.SPLIT` (3): Bị tách làm 2 khối đơn 1x1x1 tại `(r, c)` và `(r2, c2)`.
-* `state.bridges_mask`: Một `tuple` các giá trị `bool` biểu diễn trạng thái Đóng (`False`) / Mở (`True`) của từng cây cầu.
-* `state.get_occupied_cells()`: Trả về danh sách các tọa độ `[(r, c), ...]` mà khối đang đè lên.
-* **Lưu ý:** `State` đã được cài sẵn `__hash__`, `__eq__`, và `__lt__`, nên có thể bỏ trực tiếp vào `visited = set()` hoặc `heapq.heappush(frontier, (cost, state, path))`.
+---
 
-### 4.2. Các hàm có sẵn của `Board` (`Source/core/board.py`)
-Khi viết thuật toán trong `solvers/`, biến `self.board` cung cấp sẵn:
-* `self.board.get_initial_state() -> State`: Trả về trạng thái xuất phát của màn chơi.
-* `self.board.is_goal(state: State) -> bool`: Kiểm tra trạng thái hiện tại đã thắng chưa (đứng thẳng tại ô đích).
-* `self.board.get_successors(state: State) -> List[Tuple[str, State]]`: Trả về danh sách các cặp `(action, next_state)` hợp lệ. Trong đó `action` là một trong các chuỗi: `'UP'`, `'DOWN'`, `'LEFT'`, `'RIGHT'`, hoặc `'SWITCH_CUBE'`.
-* Các thuộc tính hỗ trợ tính Cost và Heuristic:
-  * `self.board.grid`: Ma trận 2 chiều của bản đồ (`0`: Void, `1`: Gạch thường, `2`: Ô dễ vỡ Fragile tile, `9`: Đích Goal).
-  * `self.board.goal_pos`: Tuple `(goal_r, goal_c)` tọa độ ô đích.
-  * `self.board.switches`: Dictionary `{ (r, c): switch_info_dict }` lưu các công tắc trên bản đồ.
+## 4. "HỢP ĐỒNG CODE" & RÀNG BUỘC BẮT BUỘC CHO CÁC BẠN VIẾT THUẬT TOÁN
 
-### 4.3. Khuôn mẫu `BaseSolver` (`Source/solvers/base_solver.py`)
-Mọi thuật toán đều phải kế thừa `BaseSolver` và định nghĩa hàm `_search(self)`:
-~~~python
-from typing import List, Optional
-from solvers.base_solver import BaseSolver
+> **Mẹo cho thành viên nhóm:** Khi dùng Gemini Pro / ChatGPT hỗ trợ viết thuật toán của mình, **hãy copy toàn bộ Mục 4 này gửi cho AI** để code sinh ra khớp 100% với hệ thống.
 
-class TenThuatToanSolver(BaseSolver):
-    def _search(self) -> Optional[List[str]]:
-        # 1. Lấy trạng thái đầu: start_state = self.board.get_initial_state()
-        # 2. Mỗi khi lấy 1 trạng thái ra khỏi frontier để mở rộng, BẮT BUỘC gọi:
-        #       self.expanded_nodes += 1
-        # 3. Trả về danh sách các bước đi (VD: ['RIGHT', 'DOWN', ...]) hoặc None nếu vô nghiệm.
-        pass
+### 4.1. Quy định tên File và tên Class (Để `main.py` và `benchmark.py` tự động nhận diện)
+* Bạn làm **DFS**: Viết trong file `Source/solvers/dfs_solver.py` $\rightarrow$ đặt tên class là `DFSSolver(BaseSolver)`.
+* Bạn làm **IDS**: Tạo file `Source/solvers/ids_solver.py` $\rightarrow$ đặt tên class là `IDSSolver(BaseSolver)`.
+* Bạn làm **UCS**: Viết trong file `Source/solvers/ucs_solver.py` $\rightarrow$ đặt tên class là `UCSSolver(BaseSolver)`.
+* Bạn làm **A\***: Viết trong file `Source/solvers/astar_solver.py` $\rightarrow$ đặt tên class là `AStarSolver(BaseSolver)`.
+
+### 4.2. Ràng buộc bên trong hàm `_search(self)`
+1. **Đếm số nút mở rộng:** Mỗi khi lấy (pop) một trạng thái ra khỏi `frontier` (queue/stack/heap) để duyệt các trạng thái kế tiếp, **BẮT BUỘC** phải có dòng:
+   ~~~python
+   self.expanded_nodes += 1
+   ~~~
+2. **Không dùng lệnh `print()` trong vòng lặp tìm kiếm:** Để tránh làm sai lệch thông số `Search Time`.
+3. **Giá trị trả về:** Trả về `List[str]` chứa danh sách hành động (ví dụ `['RIGHT', 'DOWN', ...]`) hoặc `None` nếu không tìm thấy đường đi.
+
+### 4.3. Các hàm và thuộc tính có sẵn từ `self.board` và `State`
+* `start_state = self.board.get_initial_state()`: Lấy trạng thái bắt đầu.
+* `self.board.is_goal(state)`: Trả về `True` nếu `state` đã thắng.
+* `self.board.get_successors(state)`: Trả về danh sách các cặp `(action, next_state)` hợp lệ.
+* Thuộc tính của `state`:
+  * `state.r, state.c`: Tọa độ dòng, cột.
+  * `state.orientation`: `Orientation.STANDING` (0), `Orientation.LYING_H` (1), `Orientation.LYING_V` (2), `Orientation.SPLIT` (3 - có thêm `state.r2, state.c2` và `state.active_cube`).
+  * `state.get_occupied_cells()`: Trả về list các ô `[(r, c), ...]` mà khối đang chiếm giữ.
+  * `State` đã có sẵn `__hash__`, `__eq__`, `__lt__` nên dùng trực tiếp được trong `set()`, `dict()`, và `heapq`.
+* Thuộc tính của `self.board`:
+  * `self.board.grid[r][c]`: Giá trị ô (`0`: Void, `1`: Gạch thường, `2`: Ô dễ vỡ Fragile tile, `9`: Goal).
+  * `self.board.goal_pos`: Tuple `(goal_r, goal_c)` tọa độ đích.
+  * `self.board.switches`: Dict `{ (r, c): switch_dict }` chứa thông tin công tắc (với `split` switch có trường `"teleport_to": [[r1, c1], [r2, c2]]`).
+
+### 4.4. Quy ước chung về Hàm Chi Phí (Step Cost) cho bạn làm UCS và A*
+Để đảm bảo tính nhất quán trong báo cáo và giữ tính **Admissible** của Heuristic trong A*, nhóm thống nhất quy ước chi phí cho 1 bước chuyển `(current_state, action, next_state)`:
+* **Bước đi thông thường (trên gạch cứng hoặc đổi khối `SWITCH_CUBE`):** `cost = 1.0`.
+* **Bước đi nguy hiểm (trong `next_state.get_occupied_cells()` có ít nhất 1 ô là Fragile tile, tức `self.board.grid[r][c] == 2`):** `cost = 4.0` (phạt nặng rủi ro đi lên gạch dễ vỡ).
+* **Lưu ý cho bạn làm A\*:**
+  * Vì chi phí bước nhỏ nhất là $\min(\text{cost}) = 1.0$, hàm Heuristic $h(n)$ dùng khoảng cách Manhattan chia 2 ($\frac{\vert{}r - r_{goal}\vert{} + \vert{}c - c_{goal}\vert{}}{2.0}$) đảm bảo không vượt quá số bước thực tế.
+  * **Đặc biệt chú ý:** Với các màn có cổng dịch chuyển `split` switch (`level_10`, `11`, `12`), việc đi qua cổng dịch chuyển có thể rút ngắn khoảng cách so với đi bộ thông thường. Do đó, để giữ vững tính **Admissible**, hàm Heuristic cần lấy giá trị nhỏ nhất ($\min$) giữa khoảng cách đi trực tiếp tới đích và khoảng cách đi tới cổng `split` cộng với khoảng cách từ điểm dịch chuyển (`teleport_to`) tới đích!
+
+---
+
+## 5. QUY TRÌNH KIỂM TRA TRƯỚC KHI PUSH LÊN NHÁNH RIÊNG
+
+Sau khi code xong phần của mình, các bạn bắt buộc chạy lệnh sau trên Terminal:
+~~~bash
+python Source/benchmark.py
 ~~~
-
----
-
-## 5. HƯỚNG DẪN CHI TIẾT CHO TỪNG NHIỆM VỤ (KÈM PROMPT AI)
-
-### 🔹 NHIỆM VỤ 1: Cài đặt DFS (hoặc IDS) và UCS (`dfs_solver.py` & `ucs_solver.py`)
-* **File cần làm:** `Source/solvers/dfs_solver.py` (class `DFSSolver`) và `Source/solvers/ucs_solver.py` (class `UCSSolver`).
-* **Yêu cầu cốt lõi từ đề bài:**
-  * **DFS:** Phải dùng tập `visited` để tránh bị kẹt trong chu trình lặp vô tận (cycles), hoặc có thể cài đặt Iterative Deepening Search (IDS).
-  * **UCS:** Nếu mọi bước đi đều có cost = 1 thì UCS sẽ biến thành BFS. Vì vậy bắt buộc phải thiết kế một **hàm chi phí không đồng nhất (non-uniform cost function)** hợp lý (ví dụ: di chuyển bình thường tốn cost = 2; di chuyển đè lên ô dễ vỡ `grid[r][c] == 2` tốn cost = 5 vì nguy hiểm; kích hoạt công tắc tốn cost = 1...) và giải thích rõ trong báo cáo.
-* **Cách test sau khi code xong:** Mở `Source/main.py`, xóa dấu `#` ở dòng `from solvers.dfs_solver import DFSSolver`, `from solvers.ucs_solver import UCSSolver` và trong `solver_map`, sau đó chạy `python Source/main.py` rồi bấm nút `Solve DFS` / `Solve UCS` trên web.
-* 💡 **Prompt mẫu để bạn copy dán vào Gemini Pro / ChatGPT:**
-  > *"Tôi đang làm đồ án Bloxorz Solver bằng Python. Đây là nội dung README đặc tả cấu trúc `State`, `Board`, và `BaseSolver` của nhóm tôi: [Dán mục 4 của README vào đây]. Hãy viết giúp tôi code hoàn chỉnh cho file `Source/solvers/dfs_solver.py` (class `DFSSolver`) và `Source/solvers/ucs_solver.py` (class `UCSSolver` sử dụng `heapq` với hàm chi phí không đồng nhất: bước thường cost = 2, đè lên ô dễ vỡ Fragile tile có `grid[r][c] == 2` thì cost = 5, bước đổi khối `SWITCH_CUBE` cost = 1). Đồng thời viết giải thích lý thuyết toán học của hàm Cost này để tôi đưa vào Report."*
-
----
-
-### 🔹 NHIỆM VỤ 2: Cài đặt A* (`astar_solver.py`) & Chạy thực nghiệm (`benchmark.py`)
-* **File cần làm:** `Source/solvers/astar_solver.py` (class `AStarSolver`) và `Source/benchmark.py`.
-* **Yêu cầu cốt lõi từ đề bài:**
-  * Thiết kế hàm `heuristic(state)` ước lượng khoảng cách đến `self.board.goal_pos`.
-  * Đảm bảo tính **Admissible** (không bao giờ ước lượng vượt quá chi phí thực tế) tương ứng với hàm Cost đã chọn. Chú ý xử lý trường hợp bản đồ có cổng dịch chuyển (`split` switch) và trạng thái khối đang nằm cần ít nhất 1 bước để dựng đứng.
-  * Viết `Source/benchmark.py` tự động chạy cả 4 thuật toán (`BFS`, `DFS`, `UCS`, `A*`) qua tất cả các file `.json` trong `Source/levels/`, in bảng kết quả (Time, Memory, Expanded Nodes, Length) và dùng `matplotlib` vẽ biểu đồ cột/đường so sánh lưu thành ảnh `.png` để chèn vào Report.
-
----
-
-### 🔹 NHIỆM VỤ 3: Thiết kế 10+ Test Cases (`levels/`) & Nâng cấp GUI 3D (`gui/index.html`)
-* **Phần 1 - Tạo bộ Map Test Cases (Tối thiểu 10–12 màn chơi):**
-  * Tạo các file `level_01.json` đến `level_12.json` trong `Source/levels/`.
-  * Có thể lấy bản đồ từ game Bloxorz gốc trên Coolmath Games hoặc trên GitHub (nhớ lưu link nguồn để trích dẫn vào báo cáo).
-  * Chia rõ thành **4 nhóm độ khó tăng dần** để phân tích trong báo cáo:
-    1. `level_01` -> `level_03` (Easy): Chỉ có gạch thường (`1`), ô trống (`0`) và đích (`9`).
-    2. `level_04` -> `level_06` (Medium - Fragile): Có thêm các ô dễ vỡ màu cam (`2`).
-    3. `level_07` -> `level_09` (Hard - Bridges & Switches): Có cầu đóng/mở và công tắc `soft`, `heavy`.
-    4. `level_10` -> `level_12` (Expert - Combined & Split): Kết hợp đủ loại gạch và có công tắc `split` tách khối.
-* **Phần 2 - Làm đẹp GUI 3D (`Source/gui/index.html`):**
-  * Giữ nguyên các hàm gọi API (`/api/levels`, `/api/level/<filename>`, `/api/move`, `/api/solve`), nâng cấp phần hiển thị `Three.js`:
-    * Vẽ đường viền đen (`THREE.EdgesGeometry`) cho từng viên gạch và khối sắt để nhìn rõ khối 3D như game gốc.
-    * Thêm `THREE.OrbitControls` để người dùng có thể dùng chuột xoay/zoom bản đồ 3D.
-    * Phân biệt rõ hình dáng 3 loại công tắc trên mặt gạch: Hình trụ tròn cho `soft`, chữ X cho `heavy`, và vòng tròn/dấu ngoặc cho `split`.
-* 💡 **Prompt mẫu để bạn copy dán vào Gemini Pro / ChatGPT:**
-  > *"Đây là file `Source/gui/index.html` hiện tại của nhóm tôi: [Dán code index.html vào]. Hãy giữ nguyên toàn bộ logic gọi API backend Flask, nhưng nâng cấp đồ họa Three.js giúp tôi: (1) Thêm viền đen `EdgesGeometry` cho từng ô gạch và khối chữ nhật để nhìn sắc nét, (2) Tích hợp `OrbitControls` qua CDN để xoay góc nhìn 3D bằng chuột, (3) Vẽ công tắc `heavy` hình chữ X và `soft` hình tròn nổi bật trên mặt gạch, (4) Làm hiệu ứng nội suy mượt mà khi khối di chuyển giữa các trạng thái."*
-
----
-
-## 6. QUY TẮC LÀM VIỆC NHÓM & CHUẨN BỊ BÁO CÁO (REPORT)
-
-1. **Không sửa trực tiếp vào `Source/core/`:** Mọi logic luật chơi đã chuẩn hóa ở `core/`. Nếu phát hiện bug, hãy nhắn cho Trưởng nhóm kiểm tra.
-2. **Ghi chép lại Prompt AI:** Mỗi thành viên khi dùng Gemini/ChatGPT hỗ trợ code phần của mình hãy **lưu lại 2–3 câu prompt tiêu biểu** vào một file nháp để cuối kỳ tổng hợp vào mục **Appendix (Phụ lục)** của báo cáo (bắt buộc theo yêu cầu đề bài trang 7).
-3. **Viết thuyết minh thuật toán của mình:** Ai code thuật toán nào thì chuẩn bị luôn 1–2 trang giải thích thuật toán đó (cách hoạt động, hàm Cost / Heuristic, ưu nhược điểm khi chạy thực nghiệm) để ghép vào phần **Algorithm Description (10 điểm)** và sẵn sàng trả lời khi thầy gọi vấn đáp.
-'@
-Set-Content -Path "README.md" -Value $readme -Encoding UTF8
-Write-Host "Đã ghi xong file README.md chuẩn định dạng 100%!" -ForegroundColor Green
+Kiểm tra trên bảng kết quả in ra màn hình:
+1. Cột `Solved` của thuật toán mình vừa code phải hiện **`OK`** trên tất cả 12 màn chơi (không bị `INVALID` hay `FAIL`).
+2. Cột `Nodes` (`Expanded Nodes`) phải lớn hơn `0`.
+3. Sau khi xác nhận chạy mượt, hãy push lên **branch riêng** của bạn và nhắn lên nhóm để merge vào `main`!
