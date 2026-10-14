@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <title>Bloxorz 3D Solver - CSC14003 AI Project 1</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <style>
+    body { margin: 0; overflow: hidden; font-family: 'Segoe UI', sans-serif; background: #1a0905; color: #fff; }
+    #ui-panel {
+      position: absolute; top: 15px; left: 15px; z-index: 10;
+      background: rgba(20, 20, 28, 0.88); padding: 16px; border-radius: 10px;
+      border: 1px solid #444; width: 310px; box-shadow: 0 4px 15px rgba(0,0,0,0.6);
+    }
+    h2 { margin: 0 0 10px 0; font-size: 18px; color: #ff9f43; }
+    .control-group { margin-bottom: 10px; }
+    select, button {
+      padding: 8px 10px; margin: 3px 2px; border-radius: 6px; border: none;
+      font-weight: 600; cursor: pointer; font-size: 13px;
+    }
+    select { width: 100%; background: #2f3542; color: #fff; }
+    .btn-restart { background: #57606f; color: white; width: 100%; }
+    .btn-solver { background: #1e90ff; color: white; width: 47%; }
+    .btn-solver:hover { background: #3742fa; }
+    #stats {
+      margin-top: 10px; padding: 10px; background: rgba(0,0,0,0.4);
+      border-radius: 6px; font-size: 13px; line-height: 1.6;
+    }
+    .legend { font-size: 12px; color: #ccc; margin-top: 8px; line-height: 1.5; }
+    .badge { display: inline-block; width: 10px; height: 10px; margin-right: 5px; border-radius: 2px; }
+  </style>
+</head>
+<body>
+  <div id="ui-panel">
+    <h2>🟦 Bloxorz 3D Solver</h2>
+    <div class="control-group">
+      <label>Chọn màn chơi (Level):</label>
+      <select id="level-select" onchange="loadSelectedLevel()"></select>
+    </div>
+    <div class="control-group">
+      <button class="btn-restart" onclick="loadSelectedLevel()">🔄 Restart / New Game</button>
+    </div>
+    <div class="control-group">
+      <div>Chạy thuật toán (Auto-Roll):</div>
+      <button class="btn-solver" onclick="runSolver('bfs')">Solve BFS</button>
+      <button class="btn-solver" onclick="runSolver('dfs')">Solve DFS</button>
+      <button class="btn-solver" onclick="runSolver('ucs')">Solve UCS</button>
+      <button class="btn-solver" onclick="runSolver('astar')">Solve A*</button>
+    </div>
+    <div id="stats">
+      <div><b>Trạng thái:</b> <span id="status-text">Sẵn sàng (Dùng phím Mũi tên để lăn)</span></div>
+      <div><b>Số bước (Moves):</b> <span id="moves-count">0</span></div>
+      <div><b>Expanded Nodes:</b> <span id="nodes-count">-</span></div>
+      <div><b>Search Time:</b> <span id="time-count">-</span></div>
+      <div><b>Peak Memory:</b> <span id="mem-count">-</span></div>
+    </div>
+    <div class="legend">
+      <div><span class="badge" style="background:#dfe4ea"></span>Gạch thường | <span class="badge" style="background:#ff7f50"></span>Ô dễ vỡ (Fragile)</div>
+      <div><span class="badge" style="background:#2ed573"></span>Cầu đang mở | <span class="badge" style="background:#ffa502"></span>Công tắc (Switch)</div>
+      <div>⌨️ <b>Mũi tên</b>: Lăn khối | <b>Space</b>: Đổi khối đơn</div>
+    </div>
+  </div>
+
+  <script>
+    let scene, camera, renderer, boardGroup, blockGroup;
+    let levelData = null;
+    let currentState = null;
+    let moveCount = 0;
+    let animTimer = null;
+
+    function init3D() {
+      scene = new THREE.Scene();
+      camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+      renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.shadowMap.enabled = true;
+      document.body.appendChild(renderer.domElement);
+
+      const ambient = new THREE.AmbientLight(0xffffff, 0.65);
+      scene.add(ambient);
+
+      const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+      dirLight.position.set(10, 20, 15);
+      scene.add(dirLight);
+
+      boardGroup = new THREE.Group();
+      blockGroup = new THREE.Group();
+      scene.add(boardGroup);
+      scene.add(blockGroup);
+
+      window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
+
+      window.addEventListener('keydown', onKeyDown);
+      animate();
+    }
+
+    function animate() {
+      requestAnimationFrame(animate);
+      renderer.render(scene, camera);
+    }
+
+    async function fetchLevels() {
+      const res = await fetch('/api/levels');
+      const data = await res.json();
+      const select = document.getElementById('level-select');
+      select.innerHTML = data.levels.map(l => `<option value="${l}">${l}</option>`).join('');
+      if (data.levels.length > 0) loadSelectedLevel();
+    }
+
+    async function loadSelectedLevel() {
+      if (animTimer) clearInterval(animTimer);
+      const filename = document.getElementById('level-select').value;
+      const res = await fetch(`/api/level/${filename}`);
+      levelData = await res.json();
+      currentState = levelData.initial_state;
+      moveCount = 0;
+
+      document.getElementById('moves-count').innerText = '0';
+      document.getElementById('status-text').innerText = 'Đang chơi';
+      centerCamera(levelData.rows, levelData.cols);
+      renderBoardAndBlock();
+    }
+
+    function centerCamera(rows, cols) {
+      const cx = (cols - 1) / 2;
+      const cz = (rows - 1) / 2;
+      camera.position.set(cx, Math.max(rows, cols) * 1.15, cz + Math.max(rows, cols) * 0.95);
+      camera.lookAt(cx, 0, cz);
+    }
+
+    function renderBoardAndBlock() {
+      boardGroup.clear();
+      blockGroup.clear();
+
+      const tileGeo = new THREE.BoxGeometry(0.95, 0.2, 0.95);
+
+      for (let r = 0; r < levelData.rows; r++) {
+        for (let c = 0; c < levelData.cols; c++) {
+          const cellVal = levelData.grid[r][c];
+          const bridgeIdx = levelData.bridge_cells[`${r},${c}`];
+
+          if (r === levelData.goal[0] && c === levelData.goal[1]) {
+            // Viền lỗ đích
+            const goalMat = new THREE.MeshLambertMaterial({ color: 0x111111 });
+            const goalMesh = new THREE.Mesh(new THREE.BoxGeometry(0.95, 0.05, 0.95), goalMat);
+            goalMesh.position.set(c, -0.08, r);
+            boardGroup.add(goalMesh);
+            continue;
+          }
+
+          let color = null;
+          if (bridgeIdx !== undefined) {
+            if (currentState.bridges_mask[bridgeIdx]) color = 0x2ed573; // Cầu đang mở
+          } else if (cellVal === 1) {
+            color = 0xdfe4ea; // Gạch thường
+          } else if (cellVal === 2) {
+            color = 0xff7f50; // Ô dễ vỡ (Fragile tile)
+          }
+
+          if (color !== null) {
+            const mat = new THREE.MeshLambertMaterial({ color });
+            const tile = new THREE.Mesh(tileGeo, mat);
+            tile.position.set(c, 0, r);
+            boardGroup.add(tile);
+          }
+        }
+      }
+
+      // Vẽ các công tắc (Switches)
+      levelData.switches.forEach(sw => {
+        const [sr, sc] = sw.pos;
+        const geo = sw.type === 'soft'
+          ? new THREE.CylinderGeometry(0.35, 0.35, 0.08, 16)
+          : new THREE.BoxGeometry(0.5, 0.08, 0.5);
+        const mat = new THREE.MeshLambertMaterial({ color: sw.type === 'split' ? 0xa55eea : 0xffa502 });
+        const mesh = new THREE.Mesh(geo, mat);
+        mesh.position.set(sc, 0.14, sr);
+        boardGroup.add(mesh);
+      });
+
+      // Vẽ khối sắt 1x1x2 hoặc 2 khối đơn 1x1x1
+      const blockMat = new THREE.MeshLambertMaterial({ color: 0x3742fa });
+      const ori = currentState.orientation;
+      const r = currentState.r, c = currentState.c;
+
+      if (ori === 0) { // STANDING
+        const mesh = new THREE.Mesh(new THREE.BoxGeometry(0.9, 2.0, 0.9), blockMat);
+        mesh.position.set(c, 1.1, r);
+        blockGroup.add(mesh);
+      } else if (ori === 1) { // LYING_H: (r, c) và (r, c+1)
+        const mesh = new THREE.Mesh(new THREE.BoxGeometry(1.9, 0.9, 0.9), blockMat);
+        mesh.position.set(c + 0.5, 0.55, r);
+        blockGroup.add(mesh);
+      } else if (ori === 2) { // LYING_V: (r, c) và (r+1, c)
+        const mesh = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.9, 1.9), blockMat);
+        mesh.position.set(c, 0.55, r + 0.5);
+        blockGroup.add(mesh);
+      } else if (ori === 3) { // SPLIT: 2 khối 1x1x1
+        const m1 = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.9, 0.9), blockMat);
+        m1.position.set(c, 0.55, r);
+        const m2 = new THREE.Mesh(
+          new THREE.BoxGeometry(0.9, 0.9, 0.9),
+          new THREE.MeshLambertMaterial({ color: 0x70a1ff })
+        );
+        m2.position.set(currentState.c2, 0.55, currentState.r2);
+        blockGroup.add(m1, m2);
+      }
+    }
+
+    async function onKeyDown(e) {
+      const keyMap = {
+        ArrowUp: 'UP', ArrowDown: 'DOWN', ArrowLeft: 'LEFT', ArrowRight: 'RIGHT', ' ': 'SWITCH_CUBE'
+      };
+      if (!keyMap[e.key] || !currentState || currentState.is_goal) return;
+
+      const filename = document.getElementById('level-select').value;
+      const res = await fetch('/api/move', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ level: filename, state: currentState, action: keyMap[e.key] })
+      });
+      const data = await res.json();
+      if (!data.valid) {
+        document.getElementById('status-text').innerText = '❌ ' + data.reason;
+        return;
+      }
+      currentState = data.state;
+      moveCount++;
+      document.getElementById('moves-count').innerText = moveCount;
+      renderBoardAndBlock();
+
+      if (currentState.is_goal) {
+        document.getElementById('status-text').innerText = '🎉 CHIẾN THẮNG!';
+      }
+    }
+
+    async function runSolver(algo) {
+      if (animTimer) clearInterval(animTimer);
+      const filename = document.getElementById('level-select').value;
+      document.getElementById('status-text').innerText = `⏳ Đang giải bằng ${algo.toUpperCase()}...`;
+
+      const res = await fetch('/api/solve', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ level: filename, algo })
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.error);
+        document.getElementById('status-text').innerText = '⚠️ Chưa cài đặt thuật toán này';
+        return;
+      }
+
+      document.getElementById('nodes-count').innerText = data.expanded_nodes;
+      document.getElementById('time-count').innerText = data.search_time_sec + ' s';
+      document.getElementById('mem-count').innerText = data.peak_memory_kb + ' KB';
+
+      if (!data.solved) {
+        document.getElementById('status-text').innerText = '❌ Không tìm thấy lời giải!';
+        return;
+      }
+
+      document.getElementById('status-text').innerText = `🤖 Đang tự động lăn (${data.solution_length} bước)...`;
+      let step = 0;
+      animTimer = setInterval(() => {
+        currentState = data.trace[step];
+        document.getElementById('moves-count').innerText = step;
+        renderBoardAndBlock();
+        step++;
+        if (step >= data.trace.length) {
+          clearInterval(animTimer);
+          document.getElementById('status-text').innerText = `🎉 Đã tới đích (${algo.toUpperCase()})!`;
+        }
+      }, 350);
+    }
+
+    init3D();
+    fetchLevels();
+  </script>
+</body>
+</html>
