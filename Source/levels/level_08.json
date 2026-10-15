@@ -1,0 +1,27 @@
+{
+  "name": "G3-2: Triple Bridge & Dual Heavy Switches",
+  "difficulty": "3_switches",
+  "grid": [
+    [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0],
+    [1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 1],
+    [1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 1],
+    [1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 1],
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 0, 1, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+    [0, 0, 0, 0, 0, 0, 0, 9, 1, 1, 1, 1, 1, 1, 1],
+    [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1]
+  ],
+  "start": [4, 1],
+  "goal": [7, 7],
+  "bridges": {
+    "B1": { "cells": [[4, 4], [4, 5]], "initial_state": false },
+    "B2": { "cells": [[4, 10], [4, 11]], "initial_state": false },
+    "B3": { "cells": [[5, 13], [6, 13]], "initial_state": false }
+  },
+  "switches": [
+    { "pos": [2, 2], "type": "soft", "behavior": "toggle", "target_bridges": ["B1"], "fixed_state": null },
+    { "pos": [2, 8], "type": "heavy", "behavior": "permanent", "target_bridges": ["B2"], "fixed_state": true },
+    { "pos": [1, 13], "type": "heavy", "behavior": "permanent", "target_bridges": ["B3"], "fixed_state": true }
+  ]
+}

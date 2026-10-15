@@ -1,0 +1,21 @@
+{
+  "name": "G4-1: Classic Stage 7 Split & Rejoin",
+  "difficulty": "4_combined",
+  "grid": [
+    [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0],
+    [1, 1, 1, 2, 2, 1, 0, 1, 1, 1, 1, 0, 0, 0],
+    [1, 1, 1, 2, 2, 1, 0, 0, 0, 1, 1, 2, 2, 1],
+    [1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 2, 2, 1],
+    [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 9],
+    [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0]
+  ],
+  "start": [1, 0],
+  "goal": [4, 13],
+  "bridges": {
+    "B1": { "cells": [[2, 9], [3, 9]], "initial_state": false }
+  },
+  "switches": [
+    { "pos": [1, 5], "type": "split", "teleport_to": [[0, 7], [5, 7]] },
+    { "pos": [0, 10], "type": "soft", "behavior": "permanent", "target_bridges": ["B1"], "fixed_state": true }
+  ]
+}

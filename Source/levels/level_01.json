@@ -1,33 +1,16 @@
 {
-  "name": "Stage 1 - Bridge & Fragile Tile",
-  "difficulty": "easy",
+  "name": "G1-1: Classic Stage 1 (Passcode 780464)",
+  "difficulty": "1_basic",
   "grid": [
-    [1, 1, 1, 1, 0, 0, 1, 1, 1],
-    [1, 1, 1, 1, 1, 1, 1, 2, 2],
-    [1, 1, 1, 1, 0, 0, 1, 1, 1]
+    [1, 1, 1, 0, 0, 0, 0, 0, 0, 0],
+    [1, 1, 1, 1, 1, 1, 0, 0, 0, 0],
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+    [0, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [0, 0, 0, 0, 0, 1, 1, 9, 1, 1],
+    [0, 0, 0, 0, 0, 0, 1, 1, 1, 0]
   ],
-  "start": [1, 0],
-  "goal": [2, 6],
-  "bridges": {
-    "B1": {
-      "cells": [[1, 4], [1, 5]],
-      "initial_state": false
-    }
-  },
-  "switches": [
-    {
-      "pos": [0, 2],
-      "type": "soft",
-      "behavior": "toggle",
-      "target_bridges": ["B1"],
-      "fixed_state": null
-    },
-    {
-      "pos": [2, 2],
-      "type": "heavy",
-      "behavior": "permanent",
-      "target_bridges": ["B1"],
-      "fixed_state": true
-    }
-  ]
+  "start": [1, 1],
+  "goal": [4, 7],
+  "bridges": {},
+  "switches": []
 }
