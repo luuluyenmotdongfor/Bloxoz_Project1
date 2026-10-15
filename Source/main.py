@@ -11,8 +11,8 @@ from core.state import State, Orientation
 from solvers.bfs_solver import BFSSolver
 # Khi nhóm code xong 3 thuật toán còn lại thì mở comment 3 dòng dưới:
 # from solvers.dfs_solver import DFSSolver
-# from solvers.ucs_solver import UCSSolver
-# from solvers.astar_solver import AStarSolver
+from solvers.ucs_solver import UCSSolver
+from solvers.astar_solver import AStarSolver
 
 app = Flask(__name__, static_folder=os.path.join(BASE_DIR, "gui"))
 LEVELS_DIR = os.path.join(BASE_DIR, "levels")
@@ -111,8 +111,8 @@ def solve_level():
         "bfs": BFSSolver,
         # Mở comment khi các bạn trong nhóm code xong:
         # "dfs": DFSSolver,
-        # "ucs": UCSSolver,
-        # "astar": AStarSolver,
+        "ucs": UCSSolver,
+        "astar": AStarSolver,
     }
 
     if algo not in solver_map:
