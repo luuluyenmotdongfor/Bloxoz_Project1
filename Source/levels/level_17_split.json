@@ -1,0 +1,21 @@
+﻿{
+  "name": "G5-5: Dual Relay (Two Soft Switches, One Bridge)",
+  "difficulty": "5_split_advanced",
+  "grid": [
+    [0, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+    [1, 1, 1, 1, 0, 0, 0, 1, 1, 0],
+    [1, 1, 1, 0, 0, 0, 0, 1, 1, 0],
+    [0, 1, 1, 0, 0, 0, 0, 1, 9, 0],
+    [0, 1, 1, 1, 1, 1, 1, 1, 0, 0]
+  ],
+  "start": [1, 0],
+  "goal": [3, 8],
+  "bridges": {
+    "B1": { "cells": [[1, 6], [2, 6], [3, 6]], "initial_state": false }
+  },
+  "switches": [
+    { "pos": [1, 3], "type": "split", "teleport_to": [[0, 1], [4, 1]] },
+    { "pos": [0, 6], "type": "soft", "behavior": "permanent", "target_bridges": ["B1"], "fixed_state": true },
+    { "pos": [4, 6], "type": "soft", "behavior": "permanent", "target_bridges": ["B1"], "fixed_state": true }
+  ]
+}
