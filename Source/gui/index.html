@@ -3,29 +3,38 @@
 <head>
   <meta charset="UTF-8" />
   <title>Bloxorz 3D Solver - CSC14003 AI Project 1</title>
+  <!-- Three.js r128 & OrbitControls CDN -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
   <style>
     body { margin: 0; overflow: hidden; font-family: 'Segoe UI', sans-serif; background: #1a0905; color: #fff; }
     #ui-panel {
       position: absolute; top: 15px; left: 15px; z-index: 10;
-      background: rgba(20, 20, 28, 0.88); padding: 16px; border-radius: 10px;
-      border: 1px solid #444; width: 310px; box-shadow: 0 4px 15px rgba(0,0,0,0.6);
+      background: rgba(20, 20, 28, 0.90); padding: 16px; border-radius: 10px;
+      border: 1px solid #444; width: 320px; box-shadow: 0 4px 15px rgba(0,0,0,0.6);
+      user-select: none;
     }
     h2 { margin: 0 0 10px 0; font-size: 18px; color: #ff9f43; }
     .control-group { margin-bottom: 10px; }
     select, button {
       padding: 8px 10px; margin: 3px 2px; border-radius: 6px; border: none;
-      font-weight: 600; cursor: pointer; font-size: 13px;
+      font-weight: 600; cursor: pointer; font-size: 13px; transition: background 0.15s;
     }
     select { width: 100%; background: #2f3542; color: #fff; }
     .btn-restart { background: #57606f; color: white; width: 100%; }
-    .btn-solver { background: #1e90ff; color: white; width: 47%; }
+    .btn-restart:hover { background: #747d8c; }
+    .solver-grid {
+      display: flex; flex-wrap: wrap; justify-content: space-between; margin-top: 4px;
+    }
+    .btn-solver { background: #1e90ff; color: white; width: 48%; }
     .btn-solver:hover { background: #3742fa; }
+    .btn-solver-full { width: 100%; background: #00a8ff; }
+    .btn-solver-full:hover { background: #0097e6; }
     #stats {
-      margin-top: 10px; padding: 10px; background: rgba(0,0,0,0.4);
+      margin-top: 10px; padding: 10px; background: rgba(0,0,0,0.45);
       border-radius: 6px; font-size: 13px; line-height: 1.6;
     }
-    .legend { font-size: 12px; color: #ccc; margin-top: 8px; line-height: 1.5; }
+    .legend { font-size: 12px; color: #ccc; margin-top: 8px; line-height: 1.6; }
     .badge { display: inline-block; width: 10px; height: 10px; margin-right: 5px; border-radius: 2px; }
   </style>
 </head>
@@ -41,10 +50,13 @@
     </div>
     <div class="control-group">
       <div>Chạy thuật toán (Auto-Roll):</div>
-      <button class="btn-solver" onclick="runSolver('bfs')">Solve BFS</button>
-      <button class="btn-solver" onclick="runSolver('dfs')">Solve DFS</button>
-      <button class="btn-solver" onclick="runSolver('ucs')">Solve UCS</button>
-      <button class="btn-solver" onclick="runSolver('astar')">Solve A*</button>
+      <div class="solver-grid">
+        <button class="btn-solver" onclick="runSolver('bfs')">Solve BFS</button>
+        <button class="btn-solver" onclick="runSolver('dfs')">Solve DFS</button>
+        <button class="btn-solver" onclick="runSolver('ucs')">Solve UCS</button>
+        <button class="btn-solver" onclick="runSolver('astar')">Solve A*</button>
+        <button class="btn-solver btn-solver-full" onclick="runSolver('ids')">Solve IDS (Iterative Deepening)</button>
+      </div>
     </div>
     <div id="stats">
       <div><b>Trạng thái:</b> <span id="status-text">Sẵn sàng (Dùng phím Mũi tên để lăn)</span></div>
@@ -55,31 +67,51 @@
     </div>
     <div class="legend">
       <div><span class="badge" style="background:#dfe4ea"></span>Gạch thường | <span class="badge" style="background:#ff7f50"></span>Ô dễ vỡ (Fragile)</div>
-      <div><span class="badge" style="background:#2ed573"></span>Cầu đang mở | <span class="badge" style="background:#ffa502"></span>Công tắc (Switch)</div>
+      <div><span class="badge" style="background:#2ed573"></span>Cầu đang mở | <span class="badge" style="background:#a55eea"></span>Tách khối (Split)</div>
+      <div><span class="badge" style="background:#70a1ff; border-radius:50%"></span>Soft Switch (Tròn) | <span class="badge" style="background:#ffa502"></span>Heavy Switch (Chữ X)</div>
       <div>⌨️ <b>Mũi tên</b>: Lăn khối | <b>Space</b>: Đổi khối đơn</div>
+      <div>🖱️ <b>Chuột trái/Cuộn/Phải</b>: Xoay / Zoom / Kéo 3D</div>
     </div>
   </div>
 
   <script>
-    let scene, camera, renderer, boardGroup, blockGroup;
+    let scene, camera, renderer, controls, boardGroup, blockGroup;
     let levelData = null;
     let currentState = null;
     let moveCount = 0;
     let animTimer = null;
 
+    // Hàm tạo đường viền đen sắc nét cho mọi khối Mesh 3D
+    function addEdges(mesh, edgeColor = 0x111111) {
+      const edges = new THREE.EdgesGeometry(mesh.geometry);
+      const lineMat = new THREE.LineBasicMaterial({ color: edgeColor, linewidth: 1.5 });
+      const wireframe = new THREE.LineSegments(edges, lineMat);
+      mesh.add(wireframe);
+    }
+
     function init3D() {
       scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x1a0905);
+
       camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
       renderer = new THREE.WebGLRenderer({ antialias: true });
       renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(window.devicePixelRatio);
       renderer.shadowMap.enabled = true;
       document.body.appendChild(renderer.domElement);
 
-      const ambient = new THREE.AmbientLight(0xffffff, 0.65);
+      // Tích hợp OrbitControls để xoay, zoom bản đồ 3D bằng chuột
+      controls = new THREE.OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.08;
+      controls.enableKeys = false; // Tắt phím mũi tên của OrbitControls để dùng lăn khối
+      controls.maxPolarAngle = Math.PI / 2 - 0.05; // Giữ góc nhìn phía trên mặt bàn cờ
+
+      const ambient = new THREE.AmbientLight(0xffffff, 0.7);
       scene.add(ambient);
 
-      const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
-      dirLight.position.set(10, 20, 15);
+      const dirLight = new THREE.DirectionalLight(0xffffff, 0.85);
+      dirLight.position.set(12, 24, 16);
       scene.add(dirLight);
 
       boardGroup = new THREE.Group();
@@ -99,6 +131,7 @@
 
     function animate() {
       requestAnimationFrame(animate);
+      if (controls) controls.update();
       renderer.render(scene, camera);
     }
 
@@ -112,7 +145,10 @@
 
     async function loadSelectedLevel() {
       if (animTimer) clearInterval(animTimer);
-      const filename = document.getElementById('level-select').value;
+      const selectEl = document.getElementById('level-select');
+      selectEl.blur(); // Bỏ focus khỏi thẻ select để phím mũi tên không làm đổi level
+      const filename = selectEl.value;
+
       const res = await fetch(`/api/level/${filename}`);
       levelData = await res.json();
       currentState = levelData.initial_state;
@@ -127,15 +163,20 @@
     function centerCamera(rows, cols) {
       const cx = (cols - 1) / 2;
       const cz = (rows - 1) / 2;
-      camera.position.set(cx, Math.max(rows, cols) * 1.15, cz + Math.max(rows, cols) * 0.95);
+      const span = Math.max(rows, cols);
+      camera.position.set(cx, span * 1.15, cz + span * 0.95);
       camera.lookAt(cx, 0, cz);
+      if (controls) {
+        controls.target.set(cx, 0, cz);
+        controls.update();
+      }
     }
 
     function renderBoardAndBlock() {
       boardGroup.clear();
       blockGroup.clear();
 
-      const tileGeo = new THREE.BoxGeometry(0.95, 0.2, 0.95);
+      const tileGeo = new THREE.BoxGeometry(0.96, 0.22, 0.96);
 
       for (let r = 0; r < levelData.rows; r++) {
         for (let c = 0; c < levelData.cols; c++) {
@@ -143,10 +184,11 @@
           const bridgeIdx = levelData.bridge_cells[`${r},${c}`];
 
           if (r === levelData.goal[0] && c === levelData.goal[1]) {
-            // Viền lỗ đích
-            const goalMat = new THREE.MeshLambertMaterial({ color: 0x111111 });
-            const goalMesh = new THREE.Mesh(new THREE.BoxGeometry(0.95, 0.05, 0.95), goalMat);
+            // Viền lỗ đích (Goal hole)
+            const goalMat = new THREE.MeshLambertMaterial({ color: 0x0a0a0a });
+            const goalMesh = new THREE.Mesh(new THREE.BoxGeometry(0.96, 0.06, 0.96), goalMat);
             goalMesh.position.set(c, -0.08, r);
+            addEdges(goalMesh, 0xff4757);
             boardGroup.add(goalMesh);
             continue;
           }
@@ -164,48 +206,97 @@
             const mat = new THREE.MeshLambertMaterial({ color });
             const tile = new THREE.Mesh(tileGeo, mat);
             tile.position.set(c, 0, r);
+            addEdges(tile, 0x1e272e);
             boardGroup.add(tile);
           }
         }
       }
 
-      // Vẽ các công tắc (Switches)
+      // Vẽ các công tắc (Switches): Soft (hình trụ tròn), Heavy (chữ X vàng), Split (cổng tím)
       levelData.switches.forEach(sw => {
         const [sr, sc] = sw.pos;
-        const geo = sw.type === 'soft'
-          ? new THREE.CylinderGeometry(0.35, 0.35, 0.08, 16)
-          : new THREE.BoxGeometry(0.5, 0.08, 0.5);
-        const mat = new THREE.MeshLambertMaterial({ color: sw.type === 'split' ? 0xa55eea : 0xffa502 });
-        const mesh = new THREE.Mesh(geo, mat);
-        mesh.position.set(sc, 0.14, sr);
-        boardGroup.add(mesh);
+
+        if (sw.type === 'soft') {
+          // Soft switch: Hình trụ tròn nổi bật trên mặt gạch
+          const softGeo = new THREE.CylinderGeometry(0.36, 0.36, 0.1, 24);
+          const softMat = new THREE.MeshLambertMaterial({ color: 0x70a1ff });
+          const softMesh = new THREE.Mesh(softGeo, softMat);
+          softMesh.position.set(sc, 0.16, sr);
+          addEdges(softMesh, 0x111111);
+          boardGroup.add(softMesh);
+
+        } else if (sw.type === 'split') {
+          // Split switch: Cổng dịch chuyển tách khối màu tím
+          const splitGroup = new THREE.Group();
+          splitGroup.position.set(sc, 0.16, sr);
+
+          const baseGeo = new THREE.CylinderGeometry(0.38, 0.38, 0.08, 20);
+          const baseMat = new THREE.MeshLambertMaterial({ color: 0xa55eea });
+          const baseMesh = new THREE.Mesh(baseGeo, baseMat);
+          addEdges(baseMesh, 0x111111);
+
+          const innerGeo = new THREE.CylinderGeometry(0.18, 0.18, 0.11, 16);
+          const innerMat = new THREE.MeshLambertMaterial({ color: 0xd980fa });
+          const innerMesh = new THREE.Mesh(innerGeo, innerMat);
+          addEdges(innerMesh, 0x111111);
+
+          splitGroup.add(baseMesh, innerMesh);
+          boardGroup.add(splitGroup);
+
+        } else {
+          // Heavy switch: Hình chữ X màu vàng nổi bật trên mặt gạch
+          const heavyGroup = new THREE.Group();
+          heavyGroup.position.set(sc, 0.16, sr);
+
+          const barGeo = new THREE.BoxGeometry(0.72, 0.1, 0.18);
+          const barMat = new THREE.MeshLambertMaterial({ color: 0xffc048 });
+
+          const bar1 = new THREE.Mesh(barGeo, barMat);
+          bar1.rotation.y = Math.PI / 4;
+          addEdges(bar1, 0x111111);
+
+          const bar2 = new THREE.Mesh(barGeo, barMat);
+          bar2.rotation.y = -Math.PI / 4;
+          addEdges(bar2, 0x111111);
+
+          heavyGroup.add(bar1, bar2);
+          boardGroup.add(heavyGroup);
+        }
       });
 
-      // Vẽ khối sắt 1x1x2 hoặc 2 khối đơn 1x1x1
+      // Vẽ khối sắt 1x1x2 hoặc 2 khối đơn 1x1x1 kèm đường viền đen sắc nét
       const blockMat = new THREE.MeshLambertMaterial({ color: 0x3742fa });
       const ori = currentState.orientation;
       const r = currentState.r, c = currentState.c;
 
       if (ori === 0) { // STANDING
-        const mesh = new THREE.Mesh(new THREE.BoxGeometry(0.9, 2.0, 0.9), blockMat);
-        mesh.position.set(c, 1.1, r);
+        const mesh = new THREE.Mesh(new THREE.BoxGeometry(0.92, 1.96, 0.92), blockMat);
+        mesh.position.set(c, 1.09, r);
+        addEdges(mesh, 0x000000);
         blockGroup.add(mesh);
       } else if (ori === 1) { // LYING_H: (r, c) và (r, c+1)
-        const mesh = new THREE.Mesh(new THREE.BoxGeometry(1.9, 0.9, 0.9), blockMat);
-        mesh.position.set(c + 0.5, 0.55, r);
+        const mesh = new THREE.Mesh(new THREE.BoxGeometry(1.92, 0.92, 0.92), blockMat);
+        mesh.position.set(c + 0.5, 0.57, r);
+        addEdges(mesh, 0x000000);
         blockGroup.add(mesh);
       } else if (ori === 2) { // LYING_V: (r, c) và (r+1, c)
-        const mesh = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.9, 1.9), blockMat);
-        mesh.position.set(c, 0.55, r + 0.5);
+        const mesh = new THREE.Mesh(new THREE.BoxGeometry(0.92, 0.92, 1.92), blockMat);
+        mesh.position.set(c, 0.57, r + 0.5);
+        addEdges(mesh, 0x000000);
         blockGroup.add(mesh);
       } else if (ori === 3) { // SPLIT: 2 khối 1x1x1
-        const m1 = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.9, 0.9), blockMat);
-        m1.position.set(c, 0.55, r);
-        const m2 = new THREE.Mesh(
-          new THREE.BoxGeometry(0.9, 0.9, 0.9),
-          new THREE.MeshLambertMaterial({ color: 0x70a1ff })
-        );
-        m2.position.set(currentState.c2, 0.55, currentState.r2);
+        const activeIdx = currentState.active_cube || 0;
+        const mat1 = new THREE.MeshLambertMaterial({ color: activeIdx === 0 ? 0x3742fa : 0x70a1ff });
+        const mat2 = new THREE.MeshLambertMaterial({ color: activeIdx === 1 ? 0x3742fa : 0x70a1ff });
+
+        const m1 = new THREE.Mesh(new THREE.BoxGeometry(0.92, 0.92, 0.92), mat1);
+        m1.position.set(c, 0.57, r);
+        addEdges(m1, 0x000000);
+
+        const m2 = new THREE.Mesh(new THREE.BoxGeometry(0.92, 0.92, 0.92), mat2);
+        m2.position.set(currentState.c2, 0.57, currentState.r2);
+        addEdges(m2, 0x000000);
+
         blockGroup.add(m1, m2);
       }
     }
@@ -215,6 +306,7 @@
         ArrowUp: 'UP', ArrowDown: 'DOWN', ArrowLeft: 'LEFT', ArrowRight: 'RIGHT', ' ': 'SWITCH_CUBE'
       };
       if (!keyMap[e.key] || !currentState || currentState.is_goal) return;
+      e.preventDefault();
 
       const filename = document.getElementById('level-select').value;
       const res = await fetch('/api/move', {
