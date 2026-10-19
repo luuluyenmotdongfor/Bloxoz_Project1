@@ -8,12 +8,35 @@
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
   <style>
     body { margin: 0; overflow: hidden; font-family: 'Segoe UI', sans-serif; background: #1a0905; color: #fff; }
+    
+    /* Bảng điều khiển bên trái có hiệu ứng trượt thu gọn */
     #ui-panel {
       position: absolute; top: 15px; left: 15px; z-index: 10;
-      background: rgba(20, 20, 28, 0.90); padding: 16px; border-radius: 10px;
-      border: 1px solid #444; width: 320px; box-shadow: 0 4px 15px rgba(0,0,0,0.6);
+      background: rgba(20, 20, 28, 0.90); padding: 14px 16px; border-radius: 10px;
+      border: 1px solid #444; width: 300px; box-shadow: 0 4px 15px rgba(0,0,0,0.6);
       user-select: none;
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
+    #ui-panel.collapsed {
+      transform: translateX(calc(-100% - 15px));
+    }
+
+    /* Nút đóng/mở bảng điều khiển nằm bên cạnh phải của panel */
+    #toggle-panel-btn {
+      position: absolute; top: 12px; right: -36px;
+      width: 34px; height: 36px; margin: 0; padding: 0;
+      background: rgba(20, 20, 28, 0.90); color: #ff9f43;
+      border: 1px solid #444; border-left: none;
+      border-radius: 0 8px 8px 0;
+      font-size: 14px; font-weight: bold; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 4px 2px 10px rgba(0,0,0,0.4);
+      transition: background 0.15s, color 0.15s;
+    }
+    #toggle-panel-btn:hover {
+      background: #2f3542; color: #fff;
+    }
+
     h2 { margin: 0 0 10px 0; font-size: 18px; color: #ff9f43; }
     .control-group { margin-bottom: 10px; }
     select, button {
@@ -31,15 +54,30 @@
     .btn-solver-full { width: 100%; background: #00a8ff; }
     .btn-solver-full:hover { background: #0097e6; }
     #stats {
-      margin-top: 10px; padding: 10px; background: rgba(0,0,0,0.45);
-      border-radius: 6px; font-size: 13px; line-height: 1.6;
+      margin-top: 8px; padding: 10px; background: rgba(0,0,0,0.45);
+      border-radius: 6px; font-size: 13px; line-height: 1.55;
     }
-    .legend { font-size: 12px; color: #ccc; margin-top: 8px; line-height: 1.6; }
+
+    /* Thanh chú thích & hướng dẫn phím nhỏ gọn ở đáy màn hình */
+    #bottom-bar {
+      position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%);
+      z-index: 10; background: rgba(20, 20, 28, 0.85);
+      padding: 8px 16px; border-radius: 8px; border: 1px solid #444;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      display: flex; flex-wrap: wrap; gap: 10px 18px;
+      align-items: center; justify-content: center;
+      font-size: 12px; color: #ccc; user-select: none;
+      pointer-events: none; /* Không chặn thao tác chuột xoay 3D */
+      max-width: 92vw;
+    }
+    .legend-item { display: flex; align-items: center; white-space: nowrap; }
     .badge { display: inline-block; width: 10px; height: 10px; margin-right: 5px; border-radius: 2px; }
+    .divider { color: #555; }
   </style>
 </head>
 <body>
   <div id="ui-panel">
+    <button id="toggle-panel-btn" onclick="togglePanel()" title="Thu gọn / Mở rộng bảng điều khiển">◀</button>
     <h2>🟦 Bloxorz 3D Solver</h2>
     <div class="control-group">
       <label>Chọn màn chơi (Level):</label>
@@ -65,28 +103,101 @@
       <div><b>Search Time:</b> <span id="time-count">-</span></div>
       <div><b>Peak Memory:</b> <span id="mem-count">-</span></div>
     </div>
-    <div class="legend">
-      <div><span class="badge" style="background:#dfe4ea"></span>Gạch thường | <span class="badge" style="background:#ff7f50"></span>Ô dễ vỡ (Fragile)</div>
-      <div><span class="badge" style="background:#2ed573"></span>Cầu đang mở | <span class="badge" style="background:#a55eea"></span>Tách khối (Split)</div>
-      <div><span class="badge" style="background:#70a1ff; border-radius:50%"></span>Soft Switch (Tròn) | <span class="badge" style="background:#ffa502"></span>Heavy Switch (Chữ X)</div>
-      <div>⌨️ <b>Mũi tên</b>: Lăn khối | <b>Space</b>: Đổi khối đơn</div>
-      <div>🖱️ <b>Chuột trái/Cuộn/Phải</b>: Xoay / Zoom / Kéo 3D</div>
-    </div>
+  </div>
+
+  <!-- Thanh chú thích nằm ngang gọn gàng ở cạnh dưới màn hình -->
+  <div id="bottom-bar">
+    <div class="legend-item"><span class="badge" style="background:#dfe4ea"></span>Gạch thường</div>
+    <div class="legend-item"><span class="badge" style="background:#ff7f50"></span>Ô dễ vỡ (Fragile)</div>
+    <div class="legend-item"><span class="badge" style="background:#2ed573"></span>Cầu đang mở</div>
+    <div class="legend-item"><span class="badge" style="background:#a55eea"></span>Tách khối (Split)</div>
+    <div class="legend-item"><span class="badge" style="background:#70a1ff; border-radius:50%"></span>Soft Switch (Tròn)</div>
+    <div class="legend-item"><span class="badge" style="background:#ffa502"></span>Heavy Switch (Chữ X)</div>
+    <span class="divider">|</span>
+    <div class="legend-item">⌨️ <b>Mũi tên</b>: Lăn khối &nbsp;•&nbsp; <b>Space</b>: Đổi khối đơn</div>
+    <div class="legend-item">🖱️ <b>Chuột trái/Cuộn/Phải</b>: Xoay / Zoom / Kéo 3D</div>
   </div>
 
   <script>
-    let scene, camera, renderer, controls, boardGroup, blockGroup;
+    let scene, camera, renderer, controls, boardGroup, blockGroup, bridgeAnimGroup;
     let levelData = null;
     let currentState = null;
     let moveCount = 0;
-    let animTimer = null;
 
-    // Hàm tạo đường viền đen sắc nét cho mọi khối Mesh 3D
-    function addEdges(mesh, edgeColor = 0x111111) {
+    // Thu gọn / Mở rộng bảng điều khiển
+    function togglePanel() {
+      const panel = document.getElementById('ui-panel');
+      const btn = document.getElementById('toggle-panel-btn');
+      panel.classList.toggle('collapsed');
+      const isCollapsed = panel.classList.contains('collapsed');
+      btn.innerText = isCollapsed ? '▶' : '◀';
+      btn.blur(); // Tránh giữ focus gây xung đột với phím Space đổi khối
+    }
+
+    // Máy trạng thái quản lý tiến trình hoạt ảnh (bổ sung trạng thái SPAWNING khi rơi từ trên trời xuống)
+    const AnimState = Object.freeze({
+      IDLE: 'IDLE',
+      SPAWNING: 'SPAWNING',
+      MOVING: 'MOVING',
+      BRIDGE_ANIMATING: 'BRIDGE_ANIMATING',
+      FALLING: 'FALLING',
+      VICTORY_FALLING: 'VICTORY_FALLING'
+    });
+
+    const BOARD_TOP_Y = 0.11;     // Cao độ mặt sàn trên của ô gạch (0.22 / 2)
+    const TILE_SIZE = 0.96;       // Kích thước ngang của mỗi ô gạch
+    const TILE_HEIGHT = 0.22;     // Độ dày của mỗi ô gạch
+    const BLOCK_INSET = 0.06;     // Độ thu nhỏ nhẹ để hiển thị viền khối sắc nét
+    const GRAVITY_ACCEL = 45.0;   // Gia tốc trọng trường cho chuyển động rơi
+    const SPAWN_DROP_HEIGHT = 9.5; // Độ cao khối gạch rơi từ trên trời xuống khi bắt đầu màn
+
+    let animState = AnimState.IDLE;
+    let activeTask = null;        // Hàm cập nhật nội suy trong vòng lặp requestAnimationFrame
+    let isSolverRunning = false;
+    let sessionToken = 0;         // Token định danh phiên chơi để hủy sạch hoạt ảnh cũ khi Reset
+    let moveQueue = [];           // Hàng đợi thao tác di chuyển hợp lệ
+    let tileMeshMap = {};         // Lưu tham chiếu mesh từng ô gạch theo tọa độ "r,c"
+
+    // Các hàm nội suy Easing
+    function easeInOutQuad(t) {
+      return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+    }
+
+    function easeOutCubic(t) {
+      return 1 - Math.pow(1 - t, 3);
+    }
+
+    function easeInCubic(t) {
+      return t * t * t;
+    }
+
+    // Sao chép sâu trạng thái ban đầu để khôi phục chính xác khối, công tắc và cầu khi tự động chơi lại
+    function cloneInitialState() {
+      if (!levelData || !levelData.initial_state) return null;
+      return JSON.parse(JSON.stringify(levelData.initial_state));
+    }
+
+    // Thêm viền đen sắc nét THREE.EdgesGeometry cho Mesh 3D
+    function addEdges(mesh, edgeColor = 0x111111, transparent = false) {
       const edges = new THREE.EdgesGeometry(mesh.geometry);
-      const lineMat = new THREE.LineBasicMaterial({ color: edgeColor, linewidth: 1.5 });
+      const lineMat = new THREE.LineBasicMaterial({
+        color: edgeColor,
+        linewidth: 1.5,
+        transparent: transparent,
+        opacity: 1.0
+      });
       const wireframe = new THREE.LineSegments(edges, lineMat);
+      wireframe.name = 'edgeWireframe';
       mesh.add(wireframe);
+    }
+
+    function setObjectOpacity(obj, opacity) {
+      obj.traverse(child => {
+        if (child.material) {
+          child.material.transparent = true;
+          child.material.opacity = opacity;
+        }
+      });
     }
 
     function init3D() {
@@ -100,12 +211,11 @@
       renderer.shadowMap.enabled = true;
       document.body.appendChild(renderer.domElement);
 
-      // Tích hợp OrbitControls để xoay, zoom bản đồ 3D bằng chuột
       controls = new THREE.OrbitControls(camera, renderer.domElement);
       controls.enableDamping = true;
       controls.dampingFactor = 0.08;
-      controls.enableKeys = false; // Tắt phím mũi tên của OrbitControls để dùng lăn khối
-      controls.maxPolarAngle = Math.PI / 2 - 0.05; // Giữ góc nhìn phía trên mặt bàn cờ
+      controls.enableKeys = false;
+      controls.maxPolarAngle = Math.PI / 2 - 0.05;
 
       const ambient = new THREE.AmbientLight(0xffffff, 0.7);
       scene.add(ambient);
@@ -115,8 +225,10 @@
       scene.add(dirLight);
 
       boardGroup = new THREE.Group();
+      bridgeAnimGroup = new THREE.Group();
       blockGroup = new THREE.Group();
       scene.add(boardGroup);
+      scene.add(bridgeAnimGroup);
       scene.add(blockGroup);
 
       window.addEventListener('resize', () => {
@@ -126,13 +238,114 @@
       });
 
       window.addEventListener('keydown', onKeyDown);
-      animate();
+      requestAnimationFrame(animate);
     }
 
-    function animate() {
+    // Vòng lặp render duy nhất kết hợp cập nhật hoạt ảnh theo thời gian thực
+    function animate(timestamp) {
       requestAnimationFrame(animate);
+      if (activeTask) {
+        activeTask(timestamp);
+      }
       if (controls) controls.update();
       renderer.render(scene, camera);
+    }
+
+    // Chạy một tiến trình nội suy theo thời gian thực, tự động hủy nếu người chơi Reset màn
+    function runTween(durationMs, onUpdate, token) {
+      return new Promise(resolve => {
+        const startTime = performance.now();
+        activeTask = (now) => {
+          if (token !== sessionToken) {
+            activeTask = null;
+            resolve(false);
+            return;
+          }
+          const elapsedMs = Math.max(0, now - startTime);
+          const progress = Math.min(1, elapsedMs / durationMs);
+          onUpdate(progress, elapsedMs / 1000);
+          if (progress >= 1) {
+            activeTask = null;
+            resolve(true);
+          }
+        };
+      });
+    }
+
+    // Hủy sạch tiến trình hoạt ảnh hiện hành khi người chơi chuyển màn hoặc bấm Restart
+    function resetAnimationSystem() {
+      sessionToken++;
+      activeTask = null;
+      animState = AnimState.IDLE;
+      isSolverRunning = false;
+      moveQueue = [];
+      if (bridgeAnimGroup) bridgeAnimGroup.clear();
+    }
+
+    // Hoạt ảnh viên gạch rơi thẳng từ trên trời xuống mặt bàn cờ khi bắt đầu màn hoặc hồi sinh
+    async function animateSpawnBlock(stateRef = currentState, token = sessionToken) {
+      if (!stateRef) return false;
+      animState = AnimState.SPAWNING;
+      blockGroup.clear();
+
+      const spawnItems = [];
+      if (stateRef.orientation === 3) {
+        const spec0 = getBoxSpec(stateRef, 0);
+        const spec1 = getBoxSpec(stateRef, 1);
+        const m0 = createBlockMeshFromSpec(spec0);
+        const m1 = createBlockMeshFromSpec(spec1);
+        spawnItems.push({ mesh: m0, targetY: spec0.cy });
+        spawnItems.push({ mesh: m1, targetY: spec1.cy });
+        blockGroup.add(m0, m1);
+      } else {
+        const spec = getBoxSpec(stateRef, 0);
+        const m = createBlockMeshFromSpec(spec);
+        spawnItems.push({ mesh: m, targetY: spec.cy });
+        blockGroup.add(m);
+      }
+
+      // Đặt khối ở trên cao và mờ lúc mới xuất hiện
+      spawnItems.forEach(({ mesh, targetY }) => {
+        mesh.position.y = targetY + SPAWN_DROP_HEIGHT;
+        setObjectOpacity(mesh, 0);
+      });
+
+      // Rơi xuống theo gia tốc trọng trường (p * p) và hiện rõ dần
+      const ok = await runTween(380, (p) => {
+        const fallFactor = p * p;
+        const alpha = Math.min(1, p / 0.35);
+        spawnItems.forEach(({ mesh, targetY }) => {
+          mesh.position.y = (targetY + SPAWN_DROP_HEIGHT) - SPAWN_DROP_HEIGHT * fallFactor;
+          setObjectOpacity(mesh, alpha);
+        });
+      }, token);
+
+      if (!ok) return false;
+
+      // Vẽ lại khối chuẩn xác tại mặt bàn cờ sau khi tiếp đất
+      renderBlockOnly(stateRef);
+      return true;
+    }
+
+    // Tự động khôi phục màn chơi và cho khối gạch rơi từ trên trời xuống ngay sau khi chết hoặc thắng
+    async function autoResetCurrentLevel(statusMessage = 'Đang chơi') {
+      if (!levelData) return;
+      const myToken = sessionToken;
+      currentState = cloneInitialState();
+      moveCount = 0;
+      moveQueue = [];
+      isSolverRunning = false;
+
+      document.getElementById('moves-count').innerText = '0';
+      document.getElementById('status-text').innerText = statusMessage;
+
+      if (bridgeAnimGroup) bridgeAnimGroup.clear();
+      renderBoardOnly(currentState);
+
+      const ok = await animateSpawnBlock(currentState, myToken);
+      if (!ok || myToken !== sessionToken) return;
+
+      animState = AnimState.IDLE;
     }
 
     async function fetchLevels() {
@@ -144,20 +357,31 @@
     }
 
     async function loadSelectedLevel() {
-      if (animTimer) clearInterval(animTimer);
+      resetAnimationSystem();
+      const myToken = sessionToken;
+
       const selectEl = document.getElementById('level-select');
-      selectEl.blur(); // Bỏ focus khỏi thẻ select để phím mũi tên không làm đổi level
+      selectEl.blur();
       const filename = selectEl.value;
 
       const res = await fetch(`/api/level/${filename}`);
+      if (myToken !== sessionToken) return;
+
       levelData = await res.json();
-      currentState = levelData.initial_state;
+      currentState = cloneInitialState();
       moveCount = 0;
 
       document.getElementById('moves-count').innerText = '0';
       document.getElementById('status-text').innerText = 'Đang chơi';
       centerCamera(levelData.rows, levelData.cols);
-      renderBoardAndBlock();
+
+      if (bridgeAnimGroup) bridgeAnimGroup.clear();
+      renderBoardOnly(currentState);
+
+      const ok = await animateSpawnBlock(currentState, myToken);
+      if (!ok || myToken !== sessionToken) return;
+
+      animState = AnimState.IDLE;
     }
 
     function centerCamera(rows, cols) {
@@ -172,30 +396,68 @@
       }
     }
 
-    function renderBoardAndBlock() {
-      boardGroup.clear();
-      blockGroup.clear();
+    // Tạo dấu đánh dấu trực quan (viền phát sáng + vòng sáng) cố định tại ô đích, độc lập với khối gạch
+    function createGoalMarker(r, c) {
+      const goalMarkerGroup = new THREE.Group();
+      goalMarkerGroup.position.set(c, 0, r);
 
-      const tileGeo = new THREE.BoxGeometry(0.96, 0.22, 0.96);
+      // 1. Đáy hố đích màu tối kèm viền phát sáng dưới đáy
+      const holeMat = new THREE.MeshBasicMaterial({ color: 0x090d16 });
+      const holeMesh = new THREE.Mesh(new THREE.BoxGeometry(0.94, 0.04, 0.94), holeMat);
+      holeMesh.position.set(0, -0.09, 0);
+      addEdges(holeMesh, 0x00ffc8);
+      goalMarkerGroup.add(holeMesh);
+
+      // 2. Khung viền phát sáng ở cao độ mặt sàn (giúp nhận diện rõ cả khi đích nằm ngoài rìa bản đồ)
+      const frameEdges = new THREE.EdgesGeometry(new THREE.BoxGeometry(TILE_SIZE, TILE_HEIGHT, TILE_SIZE));
+      const frameMat = new THREE.LineBasicMaterial({ color: 0x00ffc8, linewidth: 2 });
+      const frameWire = new THREE.LineSegments(frameEdges, frameMat);
+      frameWire.position.set(0, 0, 0);
+      goalMarkerGroup.add(frameWire);
+
+      // 3. Vòng sáng (Glowing Ring) nằm ngay trên miệng ô đích
+      const ringGeo = new THREE.RingGeometry(0.28, 0.42, 32);
+      const ringMat = new THREE.MeshBasicMaterial({
+        color: 0x00ffc8,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 0.85
+      });
+      const ringMesh = new THREE.Mesh(ringGeo, ringMat);
+      ringMesh.rotation.x = -Math.PI / 2;
+      ringMesh.position.set(0, BOARD_TOP_Y - 0.01, 0);
+      goalMarkerGroup.add(ringMesh);
+
+      return goalMarkerGroup;
+    }
+
+    // Vẽ bàn cờ tĩnh (hỗ trợ tạm ẩn các ô cầu đang thực hiện animation đóng/mở)
+    function renderBoardOnly(stateRef = currentState, excludedBridgeKeys = null) {
+      boardGroup.clear();
+      tileMeshMap = {};
+      if (!levelData || !stateRef) return;
+
+      const tileGeo = new THREE.BoxGeometry(TILE_SIZE, TILE_HEIGHT, TILE_SIZE);
+
+      // Luôn vẽ dấu đánh dấu ô đích độc lập trong boardGroup (kể cả khi đích nằm ở rìa ngoài bản đồ)
+      const [goalR, goalC] = levelData.goal;
+      boardGroup.add(createGoalMarker(goalR, goalC));
 
       for (let r = 0; r < levelData.rows; r++) {
         for (let c = 0; c < levelData.cols; c++) {
-          const cellVal = levelData.grid[r][c];
-          const bridgeIdx = levelData.bridge_cells[`${r},${c}`];
+          if (r === goalR && c === goalC) continue;
 
-          if (r === levelData.goal[0] && c === levelData.goal[1]) {
-            // Viền lỗ đích (Goal hole)
-            const goalMat = new THREE.MeshLambertMaterial({ color: 0x0a0a0a });
-            const goalMesh = new THREE.Mesh(new THREE.BoxGeometry(0.96, 0.06, 0.96), goalMat);
-            goalMesh.position.set(c, -0.08, r);
-            addEdges(goalMesh, 0xff4757);
-            boardGroup.add(goalMesh);
+          const cellKey = `${r},${c}`;
+          const cellVal = levelData.grid[r][c];
+          const bridgeIdx = levelData.bridge_cells[cellKey];
+
+          if (excludedBridgeKeys && excludedBridgeKeys.has(cellKey)) {
             continue;
           }
 
           let color = null;
           if (bridgeIdx !== undefined) {
-            if (currentState.bridges_mask[bridgeIdx]) color = 0x2ed573; // Cầu đang mở
+            if (stateRef.bridges_mask[bridgeIdx]) color = 0x2ed573; // Cầu đang mở
           } else if (cellVal === 1) {
             color = 0xdfe4ea; // Gạch thường
           } else if (cellVal === 2) {
@@ -206,27 +468,24 @@
             const mat = new THREE.MeshLambertMaterial({ color });
             const tile = new THREE.Mesh(tileGeo, mat);
             tile.position.set(c, 0, r);
-            addEdges(tile, 0x1e272e);
+            addEdges(tile, 0x1e272e, true);
             boardGroup.add(tile);
+            tileMeshMap[cellKey] = tile;
           }
         }
       }
 
-      // Vẽ các công tắc (Switches): Soft (hình trụ tròn), Heavy (chữ X vàng), Split (cổng tím)
+      // Vẽ các công tắc (Switches): Soft (Tròn), Heavy (Chữ X), Split (Cổng tím)
       levelData.switches.forEach(sw => {
         const [sr, sc] = sw.pos;
-
         if (sw.type === 'soft') {
-          // Soft switch: Hình trụ tròn nổi bật trên mặt gạch
           const softGeo = new THREE.CylinderGeometry(0.36, 0.36, 0.1, 24);
           const softMat = new THREE.MeshLambertMaterial({ color: 0x70a1ff });
           const softMesh = new THREE.Mesh(softGeo, softMat);
           softMesh.position.set(sc, 0.16, sr);
           addEdges(softMesh, 0x111111);
           boardGroup.add(softMesh);
-
         } else if (sw.type === 'split') {
-          // Split switch: Cổng dịch chuyển tách khối màu tím
           const splitGroup = new THREE.Group();
           splitGroup.position.set(sc, 0.16, sr);
 
@@ -242,9 +501,7 @@
 
           splitGroup.add(baseMesh, innerMesh);
           boardGroup.add(splitGroup);
-
         } else {
-          // Heavy switch: Hình chữ X màu vàng nổi bật trên mặt gạch
           const heavyGroup = new THREE.Group();
           heavyGroup.position.set(sc, 0.16, sr);
 
@@ -263,74 +520,891 @@
           boardGroup.add(heavyGroup);
         }
       });
+    }
 
-      // Vẽ khối sắt 1x1x2 hoặc 2 khối đơn 1x1x1 kèm đường viền đen sắc nét
-      const blockMat = new THREE.MeshLambertMaterial({ color: 0x3742fa });
-      const ori = currentState.orientation;
-      const r = currentState.r, c = currentState.c;
-
-      if (ori === 0) { // STANDING
-        const mesh = new THREE.Mesh(new THREE.BoxGeometry(0.92, 1.96, 0.92), blockMat);
-        mesh.position.set(c, 1.09, r);
-        addEdges(mesh, 0x000000);
-        blockGroup.add(mesh);
-      } else if (ori === 1) { // LYING_H: (r, c) và (r, c+1)
-        const mesh = new THREE.Mesh(new THREE.BoxGeometry(1.92, 0.92, 0.92), blockMat);
-        mesh.position.set(c + 0.5, 0.57, r);
-        addEdges(mesh, 0x000000);
-        blockGroup.add(mesh);
-      } else if (ori === 2) { // LYING_V: (r, c) và (r+1, c)
-        const mesh = new THREE.Mesh(new THREE.BoxGeometry(0.92, 0.92, 1.92), blockMat);
-        mesh.position.set(c, 0.57, r + 0.5);
-        addEdges(mesh, 0x000000);
-        blockGroup.add(mesh);
-      } else if (ori === 3) { // SPLIT: 2 khối 1x1x1
-        const activeIdx = currentState.active_cube || 0;
-        const mat1 = new THREE.MeshLambertMaterial({ color: activeIdx === 0 ? 0x3742fa : 0x70a1ff });
-        const mat2 = new THREE.MeshLambertMaterial({ color: activeIdx === 1 ? 0x3742fa : 0x70a1ff });
-
-        const m1 = new THREE.Mesh(new THREE.BoxGeometry(0.92, 0.92, 0.92), mat1);
-        m1.position.set(c, 0.57, r);
-        addEdges(m1, 0x000000);
-
-        const m2 = new THREE.Mesh(new THREE.BoxGeometry(0.92, 0.92, 0.92), mat2);
-        m2.position.set(currentState.c2, 0.57, currentState.r2);
-        addEdges(m2, 0x000000);
-
-        blockGroup.add(m1, m2);
+    // Trả về thông số hình học chuẩn (tâm X, Y, Z và kích thước W, H, D) của khối theo State
+    function getBoxSpec(state, cubeIndex = 0) {
+      const ori = state.orientation;
+      if (ori === 0) { // STANDING: 1x2x1
+        return { cx: state.c, cy: BOARD_TOP_Y + 1.0, cz: state.r, w: 1, h: 2, d: 1, color: 0x3742fa };
+      } else if (ori === 1) { // LYING_H: 2x1x1 tại (r, c) và (r, c+1)
+        return { cx: state.c + 0.5, cy: BOARD_TOP_Y + 0.5, cz: state.r, w: 2, h: 1, d: 1, color: 0x3742fa };
+      } else if (ori === 2) { // LYING_V: 1x1x2 tại (r, c) và (r+1, c)
+        return { cx: state.c, cy: BOARD_TOP_Y + 0.5, cz: state.r + 0.5, w: 1, h: 1, d: 2, color: 0x3742fa };
+      } else { // SPLIT: 2 khối đơn 1x1x1
+        const activeIdx = state.active_cube || 0;
+        if (cubeIndex === 0) {
+          return {
+            cx: state.c, cy: BOARD_TOP_Y + 0.5, cz: state.r,
+            w: 1, h: 1, d: 1,
+            color: activeIdx === 0 ? 0x3742fa : 0x70a1ff
+          };
+        } else {
+          return {
+            cx: state.c2, cy: BOARD_TOP_Y + 0.5, cz: state.r2,
+            w: 1, h: 1, d: 1,
+            color: activeIdx === 1 ? 0x3742fa : 0x70a1ff
+          };
+        }
       }
     }
 
-    async function onKeyDown(e) {
+    function createBlockMeshFromSpec(spec) {
+      const geo = new THREE.BoxGeometry(
+        spec.w - BLOCK_INSET,
+        spec.h - BLOCK_INSET,
+        spec.d - BLOCK_INSET
+      );
+      const mat = new THREE.MeshLambertMaterial({ color: spec.color });
+      const mesh = new THREE.Mesh(geo, mat);
+      mesh.position.set(spec.cx, spec.cy, spec.cz);
+      addEdges(mesh, 0x000000, true);
+      return mesh;
+    }
+
+    // Vẽ tĩnh khối sắt tại vị trí chuẩn trên lưới
+    function renderBlockOnly(stateRef = currentState) {
+      blockGroup.clear();
+      if (!stateRef) return;
+
+      if (stateRef.orientation === 3) {
+        const m1 = createBlockMeshFromSpec(getBoxSpec(stateRef, 0));
+        const m2 = createBlockMeshFromSpec(getBoxSpec(stateRef, 1));
+        blockGroup.add(m1, m2);
+      } else {
+        const mesh = createBlockMeshFromSpec(getBoxSpec(stateRef, 0));
+        blockGroup.add(mesh);
+      }
+    }
+
+    function renderBoardAndBlock() {
+      if (bridgeAnimGroup) bridgeAnimGroup.clear();
+      renderBoardOnly(currentState);
+      renderBlockOnly(currentState);
+    }
+
+    // Tạo trục xoay (Pivot Group) đặt tại cạnh đáy tiếp xúc mặt sàn theo hướng lăn
+    function buildRollingPivot(spec, action) {
+      const pivot = new THREE.Group();
+      let px = spec.cx;
+      let py = BOARD_TOP_Y;
+      let pz = spec.cz;
+      let axis = 'z';
+      let targetAngle = 0;
+
+      if (action === 'RIGHT') {
+        px = spec.cx + spec.w / 2;
+        axis = 'z';
+        targetAngle = -Math.PI / 2;
+      } else if (action === 'LEFT') {
+        px = spec.cx - spec.w / 2;
+        axis = 'z';
+        targetAngle = Math.PI / 2;
+      } else if (action === 'DOWN') {
+        pz = spec.cz + spec.d / 2;
+        axis = 'x';
+        targetAngle = Math.PI / 2;
+      } else if (action === 'UP') {
+        pz = spec.cz - spec.d / 2;
+        axis = 'x';
+        targetAngle = -Math.PI / 2;
+      }
+
+      pivot.position.set(px, py, pz);
+      const mesh = createBlockMeshFromSpec(spec);
+      mesh.position.set(spec.cx - px, spec.cy - py, spec.cz - pz);
+      pivot.add(mesh);
+
+      return { pivot, mesh, axis, targetAngle };
+    }
+
+    // Tạo bản lề (Hinge Pivot) cho từng ô cầu khi đóng/mở
+    function createBridgeHingeItem(r, c, isOpening, orderIndex, totalChanged) {
+      const leftKey = `${r},${c - 1}`;
+      const rightKey = `${r},${c + 1}`;
+      const upKey = `${r - 1},${c}`;
+      const downKey = `${r + 1},${c}`;
+
+      const hasHorizontalNeighbor =
+        levelData.bridge_cells[leftKey] !== undefined ||
+        levelData.bridge_cells[rightKey] !== undefined ||
+        (c > 0 && levelData.grid[r][c - 1] !== 0) ||
+        (c + 1 < levelData.cols && levelData.grid[r][c + 1] !== 0);
+
+      const hasVerticalNeighbor =
+        levelData.bridge_cells[upKey] !== undefined ||
+        levelData.bridge_cells[downKey] !== undefined;
+
+      const pivot = new THREE.Group();
+      const tileGeo = new THREE.BoxGeometry(TILE_SIZE, TILE_HEIGHT, TILE_SIZE);
+      const tileMat = new THREE.MeshLambertMaterial({ color: 0x2ed573 });
+      const tileMesh = new THREE.Mesh(tileGeo, tileMat);
+      addEdges(tileMesh, 0x1e272e, true);
+
+      let axis = 'x';
+      const foldedAngle = Math.PI / 2;
+
+      if (hasHorizontalNeighbor || !hasVerticalNeighbor) {
+        pivot.position.set(c, 0, r - TILE_SIZE / 2);
+        tileMesh.position.set(0, 0, TILE_SIZE / 2);
+        axis = 'x';
+      } else {
+        pivot.position.set(c - TILE_SIZE / 2, 0, r);
+        tileMesh.position.set(TILE_SIZE / 2, 0, 0);
+        axis = 'z';
+      }
+
+      pivot.add(tileMesh);
+      const startAngle = isOpening ? foldedAngle : 0;
+      const endAngle = isOpening ? 0 : foldedAngle;
+      pivot.rotation[axis] = startAngle;
+
+      return {
+        pivot,
+        tileMesh,
+        axis,
+        isOpening,
+        startAngle,
+        endAngle,
+        orderIndex,
+        totalChanged
+      };
+    }
+
+    // Giữ nguyên hoạt ảnh triển khai / thu hồi cây cầu khi kích hoạt công tắc
+    async function animateBridgeTransition(prevState, nextState, token) {
+      if (!levelData || !prevState || !nextState) return true;
+
+      const changedCells = [];
+      for (const [cellKey, bridgeIdx] of Object.entries(levelData.bridge_cells)) {
+        const wasOpen = Boolean(prevState.bridges_mask[bridgeIdx]);
+        const isOpen = Boolean(nextState.bridges_mask[bridgeIdx]);
+        if (wasOpen !== isOpen) {
+          const [rStr, cStr] = cellKey.split(',');
+          changedCells.push({
+            cellKey,
+            r: parseInt(rStr, 10),
+            c: parseInt(cStr, 10),
+            isOpening: isOpen
+          });
+        }
+      }
+
+      if (changedCells.length === 0) return true;
+
+      changedCells.sort((a, b) => (a.r !== b.r ? a.r - b.r : a.c - b.c));
+
+      animState = AnimState.BRIDGE_ANIMATING;
+      const excludedSet = new Set(changedCells.map(item => item.cellKey));
+
+      renderBoardOnly(nextState, excludedSet);
+      bridgeAnimGroup.clear();
+
+      const hingeItems = changedCells.map((cell, idx) => {
+        const item = createBridgeHingeItem(cell.r, cell.c, cell.isOpening, idx, changedCells.length);
+        bridgeAnimGroup.add(item.pivot);
+        return item;
+      });
+
+      const staggerSpan = changedCells.length > 1 ? 0.22 : 0.0;
+      const itemSpan = 1.0 - staggerSpan;
+      const totalDurationMs = 280 + Math.min(3, changedCells.length - 1) * 45;
+
+      const ok = await runTween(totalDurationMs, (p) => {
+        hingeItems.forEach(item => {
+          const delay = item.totalChanged > 1
+            ? (item.orderIndex / (item.totalChanged - 1)) * staggerSpan
+            : 0;
+          const localP = Math.min(1, Math.max(0, (p - delay) / itemSpan));
+          const eased = item.isOpening ? easeOutCubic(localP) : easeInCubic(localP);
+
+          item.pivot.rotation[item.axis] = item.startAngle + (item.endAngle - item.startAngle) * eased;
+
+          const alpha = item.isOpening
+            ? Math.min(1, 0.25 + 0.75 * localP)
+            : Math.max(0, 1 - localP * 0.9);
+          setObjectOpacity(item.tileMesh, alpha);
+        });
+      }, token);
+
+      bridgeAnimGroup.clear();
+      if (!ok) return false;
+
+      renderBoardOnly(nextState);
+      return true;
+    }
+
+    // Tính toán tư thế & tọa độ tiếp đất giả định sau bước lăn cuối cùng
+    function computeHypotheticalLanding(state, action) {
+      if (state.orientation === 3) {
+        const idx = state.active_cube || 0;
+        let r = idx === 0 ? state.r : state.r2;
+        let c = idx === 0 ? state.c : state.c2;
+        if (action === 'UP') r -= 1;
+        else if (action === 'DOWN') r += 1;
+        else if (action === 'LEFT') c -= 1;
+        else if (action === 'RIGHT') c += 1;
+        return {
+          orientation: 3,
+          movingCube: idx,
+          cells: [[r, c]],
+          spec: { cx: c, cy: BOARD_TOP_Y + 0.5, cz: r, w: 1, h: 1, d: 1, color: 0x3742fa }
+        };
+      }
+
+      let r = state.r, c = state.c, ori = state.orientation;
+      if (ori === 0) {
+        if (action === 'UP') { r -= 2; ori = 2; }
+        else if (action === 'DOWN') { r += 1; ori = 2; }
+        else if (action === 'LEFT') { c -= 2; ori = 1; }
+        else if (action === 'RIGHT') { c += 1; ori = 1; }
+      } else if (ori === 1) {
+        if (action === 'UP') { r -= 1; ori = 1; }
+        else if (action === 'DOWN') { r += 1; ori = 1; }
+        else if (action === 'LEFT') { c -= 1; ori = 0; }
+        else if (action === 'RIGHT') { c += 2; ori = 0; }
+      } else if (ori === 2) {
+        if (action === 'UP') { r -= 1; ori = 0; }
+        else if (action === 'DOWN') { r += 2; ori = 0; }
+        else if (action === 'LEFT') { c -= 1; ori = 2; }
+        else if (action === 'RIGHT') { c += 1; ori = 2; }
+      }
+
+      const cells = ori === 0
+        ? [[r, c]]
+        : ori === 1
+          ? [[r, c], [r, c + 1]]
+          : [[r, c], [r + 1, c]];
+
+      const spec = getBoxSpec({ r, c, orientation: ori }, 0);
+      return { orientation: ori, movingCube: 0, cells, spec };
+    }
+
+    function isCellSupported(r, c, stateRef) {
+      if (!levelData || r < 0 || r >= levelData.rows || c < 0 || c >= levelData.cols) return false;
+      const bridgeIdx = levelData.bridge_cells[`${r},${c}`];
+      if (bridgeIdx !== undefined) {
+        return Boolean(stateRef.bridges_mask[bridgeIdx]);
+      }
+      return levelData.grid[r][c] !== 0;
+    }
+
+    // Suy luận hành động di chuyển từ 2 trạng thái kế tiếp trong lời giải của Solver
+    function inferActionFromStates(prevState, nextState) {
+      if (prevState.orientation === 3) {
+        if (nextState.orientation === 3) {
+          if (
+            prevState.r === nextState.r &&
+            prevState.c === nextState.c &&
+            prevState.r2 === nextState.r2 &&
+            prevState.c2 === nextState.c2
+          ) {
+            return { action: 'SWITCH_CUBE', movingCube: nextState.active_cube || 0 };
+          }
+          const dr0 = nextState.r - prevState.r;
+          const dc0 = nextState.c - prevState.c;
+          if (dr0 !== 0 || dc0 !== 0) {
+            const act = dr0 < 0 ? 'UP' : dr0 > 0 ? 'DOWN' : dc0 < 0 ? 'LEFT' : 'RIGHT';
+            return { action: act, movingCube: 0 };
+          }
+          const dr1 = nextState.r2 - prevState.r2;
+          const dc1 = nextState.c2 - prevState.c2;
+          const act = dr1 < 0 ? 'UP' : dr1 > 0 ? 'DOWN' : dc1 < 0 ? 'LEFT' : 'RIGHT';
+          return { action: act, movingCube: 1 };
+        } else {
+          const nextCells = nextState.orientation === 1
+            ? [[nextState.r, nextState.c], [nextState.r, nextState.c + 1]]
+            : [[nextState.r, nextState.c], [nextState.r + 1, nextState.c]];
+
+          const c0Stayed = nextCells.some(([r, c]) => r === prevState.r && c === prevState.c);
+          if (c0Stayed) {
+            const targetCell = nextCells.find(([r, c]) => !(r === prevState.r && c === prevState.c));
+            const dr = targetCell[0] - prevState.r2;
+            const dc = targetCell[1] - prevState.c2;
+            const act = dr < 0 ? 'UP' : dr > 0 ? 'DOWN' : dc < 0 ? 'LEFT' : 'RIGHT';
+            return { action: act, movingCube: 1 };
+          } else {
+            const targetCell = nextCells.find(([r, c]) => !(r === prevState.r2 && c === prevState.c2));
+            const dr = targetCell[0] - prevState.r;
+            const dc = targetCell[1] - prevState.c;
+            const act = dr < 0 ? 'UP' : dr > 0 ? 'DOWN' : dc < 0 ? 'LEFT' : 'RIGHT';
+            return { action: act, movingCube: 0 };
+          }
+        }
+      }
+
+      if (prevState.orientation !== 3 && nextState.orientation === 3) {
+        const candidates = ['UP', 'DOWN', 'LEFT', 'RIGHT'];
+        for (const act of candidates) {
+          const landed = computeHypotheticalLanding(prevState, act);
+          if (landed.orientation === 0) {
+            const [lr, lc] = landed.cells[0];
+            const isSplitSw = levelData.switches.some(
+              sw => sw.type === 'split' && sw.pos[0] === lr && sw.pos[1] === lc
+            );
+            if (isSplitSw) return { action: act, movingCube: 0 };
+          }
+        }
+      }
+
+      const prevAvgR = prevState.r + (prevState.orientation === 2 ? 0.5 : 0);
+      const prevAvgC = prevState.c + (prevState.orientation === 1 ? 0.5 : 0);
+      const nextAvgR = nextState.r + (nextState.orientation === 2 ? 0.5 : 0);
+      const nextAvgC = nextState.c + (nextState.orientation === 1 ? 0.5 : 0);
+      const dr = nextAvgR - prevAvgR;
+      const dc = nextAvgC - prevAvgC;
+      if (Math.abs(dr) > Math.abs(dc)) {
+        return { action: dr < 0 ? 'UP' : 'DOWN', movingCube: 0 };
+      } else {
+        return { action: dc < 0 ? 'LEFT' : 'RIGHT', movingCube: 0 };
+      }
+    }
+
+    // Hoạt ảnh di chuyển hợp lệ (MOVING) + kích hoạt hoạt ảnh cầu (BRIDGE_ANIMATING) nếu có
+    async function animateValidMove(prevState, nextState, action, durationMs = 200, movingCubeOverride = null) {
+      const myToken = sessionToken;
+      animState = AnimState.MOVING;
+
+      if (action === 'SWITCH_CUBE') {
+        renderBlockOnly(nextState);
+        const activeIdx = nextState.active_cube || 0;
+        const targetMesh = blockGroup.children[activeIdx];
+        if (targetMesh) {
+          await runTween(110, (p) => {
+            const s = 1 + 0.12 * Math.sin(p * Math.PI);
+            targetMesh.scale.set(s, s, s);
+          }, myToken);
+        }
+        return;
+      }
+
+      blockGroup.clear();
+
+      if (prevState.orientation === 3) {
+        const movingCube = movingCubeOverride !== null ? movingCubeOverride : (prevState.active_cube || 0);
+        const staticCube = movingCube === 0 ? 1 : 0;
+
+        const staticMesh = createBlockMeshFromSpec(getBoxSpec(prevState, staticCube));
+        const { pivot, axis, targetAngle } = buildRollingPivot(getBoxSpec(prevState, movingCube), action);
+        blockGroup.add(staticMesh, pivot);
+
+        const ok = await runTween(durationMs, (p) => {
+          pivot.rotation[axis] = targetAngle * easeInOutQuad(p);
+        }, myToken);
+        if (!ok) return;
+
+        renderBlockOnly(nextState);
+        await animateBridgeTransition(prevState, nextState, myToken);
+        return;
+      }
+
+      if (prevState.orientation !== 3 && nextState.orientation === 3) {
+        const { pivot, axis, targetAngle } = buildRollingPivot(getBoxSpec(prevState, 0), action);
+        blockGroup.add(pivot);
+
+        const ok1 = await runTween(durationMs, (p) => {
+          pivot.rotation[axis] = targetAngle * easeInOutQuad(p);
+        }, myToken);
+        if (!ok1) return;
+
+        renderBlockOnly(nextState);
+        const ok2 = await runTween(150, (p) => {
+          const s = easeOutCubic(p);
+          blockGroup.children.forEach(m => m.scale.set(s, s, s));
+        }, myToken);
+        if (!ok2) return;
+
+        await animateBridgeTransition(prevState, nextState, myToken);
+        return;
+      }
+
+      const { pivot, axis, targetAngle } = buildRollingPivot(getBoxSpec(prevState, 0), action);
+      blockGroup.add(pivot);
+
+      const ok = await runTween(durationMs, (p) => {
+        pivot.rotation[axis] = targetAngle * easeInOutQuad(p);
+      }, myToken);
+      if (!ok) return;
+
+      renderBlockOnly(nextState);
+      await animateBridgeTransition(prevState, nextState, myToken);
+    }
+
+    // ====================== VẬT LÝ RƠI (mô phỏng 2D trong mặt phẳng lật) ======================
+    // Khối được coi là vật rắn hình chữ nhật W x H trong mặt phẳng chứa hướng lật và phương thẳng đứng.
+    //  - Giai đoạn "bản lề": khối xoay quanh mép gạch (hình chiếu bản lề tại (0,0)); mô phỏng
+    //    lực pháp tuyến N và ma sát F tại mép -> khi N <= 0 hoặc |F| > mu*N thì khối TRƯỢT KHỎI MÉP.
+    //  - Giai đoạn "tự do": rơi theo trọng lực, giữ động lượng + tốc độ quay, va chạm với MỌI ô gạch
+    //    nằm dọc hướng lật (mỗi ô là một tấm phẳng [sa, sb] x [-TILE_HEIGHT, 0]) bằng cách đẩy khối ra khỏi gạch
+    //    => khối trượt dọc theo thành gạch chứ không bao giờ xuyên gạch.
+    // Hệ tọa độ: s = dọc theo hướng lật (dương = phía vực), y = độ cao so với mặt sàn gạch.
+    const TIP_FRICTION = 1.6;       // Hệ số ma sát tại mép gạch (lớn => xoay quanh mép lâu hơn trước khi trượt)
+    const TIP_EXIT_OMEGA = 2.5;     // Vận tốc góc (rad/s) lúc trọng tâm vượt qua mép gạch
+    const TIP_START_OMEGA = 3.5;    // Vận tốc góc (rad/s) khi khối nằm vắt ngang mép bắt đầu nghiêng
+    const TIP_EDGE_GAP = 0.02;      // Mép thật của gạch nằm trong mép danh nghĩa (TILE_SIZE = 0.96)
+    const TIP_KILL_Y = -4.8;        // Dừng mô phỏng khi trọng tâm rơi sâu quá mức này
+
+    function simulateTipFall({ W, H, u0, u1, phi0 = 0, omega0 = 0, slabs = [[-100, -TIP_EDGE_GAP]], allowNarrowClip = false }) {
+      const g = GRAVITY_ACCEL;
+      const cu = (u0 + u1) / 2, cv = H / 2;               // Trọng tâm so với bản lề
+      const k2 = (W * W + H * H) / 12;                    // I_cm / m
+      const hw = (W - BLOCK_INSET) / 2, hh = (H - BLOCK_INSET) / 2; // Nửa kích thước mesh thực tế
+      const dt = 1 / 480, maxT = 2.5;
+      let phi = phi0, om = omega0, t = 0;
+      let released = false, x = 0, y = 0, vx = 0, vy = 0;
+      let jammed = false; // khối đang bị kẹt giữa hai thành gạch (lỗ hổng hẹp)
+      const frames = [];
+      // Tấm gạch đang làm bản lề (mép của nó nằm tại s = -TIP_EDGE_GAP) -> bỏ qua khi kiểm tra "chạm gạch khác"
+      const pivotSlab = slabs.findIndex(sl => sl[1] >= -TIP_EDGE_GAP - 1e-6 && sl[0] < -TIP_EDGE_GAP);
+      // Độ xuyên sâu lớn nhất giữa khối (tại x, y, ph) và các tấm gạch khác tấm bản lề
+      // Khối dài vắt qua lỗ hổng hẹp hơn chính nó thì về hình học không thể lọt xuống nếu va chạm cứng với gạch đối diện
+      // (nó sẽ nằm vắt như cây cầu) -> chỉ khi đó cho phép khối quệt nhẹ qua góc gạch đối diện để vẫn rơi được.
+      const nextSlab = slabs.find(sl => sl[0] > -TIP_EDGE_GAP);
+      const ghostOthers = allowNarrowClip && !!nextSlab && nextSlab[0] < W + 0.05;
+      const overlapOthers = (cx, cy, ph) => {
+        const cc = Math.cos(ph), ss = Math.sin(ph);
+        let worst = 0;
+        slabs.forEach(([sa, sb], si) => {
+          if (si === pivotSlab || ghostOthers) return;
+          for (const a of [-hw, hw]) for (const b of [-hh, hh]) {
+            const px = cx + a * cc + b * ss, py = cy - a * ss + b * cc;
+            if (px > sa && px < sb && py > -TILE_HEIGHT && py < 0) worst = Math.max(worst, Math.min(px - sa, sb - px, -py));
+          }
+          for (const [qx, qy] of [[sa, 0], [sb, 0], [sa, -TILE_HEIGHT], [sb, -TILE_HEIGHT]]) {
+            const dx = qx - cx, dy = qy - cy;
+            const a = dx * cc - dy * ss, b = dx * ss + dy * cc;
+            if (Math.abs(a) < hw && Math.abs(b) < hh) worst = Math.max(worst, Math.min(hw - Math.abs(a), hh - Math.abs(b)));
+          }
+        });
+        return worst;
+      };
+
+      while (t < maxT) {
+        const c = Math.cos(phi), s = Math.sin(phi);
+        if (!released) {
+          x = cu * c + cv * s;
+          y = -cu * s + cv * c;
+          const alpha = g * x / (k2 + x * x + y * y);     // Gia tốc góc do mô-men trọng lực quanh bản lề
+          const ax = alpha * y - om * om * x;
+          const ay = -alpha * x - om * om * y;
+          const Rx = ax, Ry = ay + g;                     // Phản lực bản lề / khối lượng
+          const N = Rx * s + Ry * c;                      // Thành phần pháp tuyến (vuông góc mặt đáy khối)
+          const F = Rx * c - Ry * s;                      // Thành phần ma sát (dọc mặt đáy khối)
+          // Chỉ xét trượt sau khi trọng tâm đã vượt qua mép (giai đoạn trước là người chơi đang lăn khối)
+          // Cũng nhả bản lề nếu khối quay quanh mép mà chạm vào một viên gạch khác (vd: lỗ hổng chỉ rộng 1 ô)
+          if (t > 0 && (overlapOthers(x, y, phi) > 0.004 ||
+              (x > 0 && (N <= 0 || Math.abs(F) > TIP_FRICTION * N)))) {
+            released = true;
+            vx = om * y; vy = -om * x;
+            continue;
+          }
+          frames.push(x, y, phi);
+          om += alpha * dt;
+          phi += om * dt;
+        } else {
+          vy -= g * dt;
+          if (jammed) {
+            // Kẹt giữa hai thành gạch: khối tự xoay về góc thẳng hàng gần nhất (0° hoặc 90°) để lọt qua khe hẹp rồi rơi thẳng
+            const target = Math.round(phi / (Math.PI / 2)) * (Math.PI / 2);
+            om = (target - phi) * 14;
+            vx *= 0.9;
+          }
+          x += vx * dt; y += vy * dt; phi += om * dt;
+          let pushedL = false, pushedR = false; // bị đẩy ngang từ phía nào (để nhận biết bị kẹt giữa 2 thành gạch)
+          // Va chạm với từng tấm gạch: đẩy khối ra theo hướng có độ xuyên nhỏ nhất, triệt tiêu vận tốc đâm vào
+          for (let pass = 0; pass < 2; pass++) slabs.forEach(([sa, sb], si) => {
+            if (ghostOthers && si !== pivotSlab) return;
+            const cc = Math.cos(phi), ss = Math.sin(phi);
+            // (a) Góc của khối nằm trong tấm gạch
+            for (const a of [-hw, hw]) {
+              for (const b of [-hh, hh]) {
+                const px = x + a * cc + b * ss;
+                const py = y - a * ss + b * cc;
+                if (px > sa && px < sb && py > -TILE_HEIGHT && py < 0) {
+                  const dl = px - sa, dr = sb - px, du = -py;
+                  if (du <= dl && du <= dr) { y += du; if (vy < 0) vy = 0; }
+                  else if (dl < dr) { x -= dl; pushedL = true; if (vx > 0) vx = 0; }
+                  else { x += dr; pushedR = true; if (vx < 0) vx = 0; }
+                }
+              }
+            }
+            // (b) Góc của tấm gạch nằm trong khối (khối quệt qua mép gạch)
+            for (const [qx, qy] of [[sa, 0], [sb, 0], [sa, -TILE_HEIGHT], [sb, -TILE_HEIGHT]]) {
+              const dx = qx - x, dy = qy - y;
+              const a = dx * cc - dy * ss, b = dx * ss + dy * cc;
+              if (Math.abs(a) < hw && Math.abs(b) < hh) {
+                const da = hw - Math.abs(a), db = hh - Math.abs(b);
+                let nx, ny, depth;
+                if (da < db) { const sg = a > 0 ? -1 : 1; nx = sg * cc; ny = -sg * ss; depth = da; }
+                else { const sg = b > 0 ? -1 : 1; nx = sg * ss; ny = sg * cc; depth = db; }
+                x += nx * depth; y += ny * depth;
+                if (nx < -0.5) pushedL = true; else if (nx > 0.5) pushedR = true;
+                const vn = vx * nx + vy * ny;
+                if (vn < 0) { vx -= vn * nx; vy -= vn * ny; }
+              }
+            }
+          });
+          if (pushedL && pushedR) jammed = true;
+          frames.push(x, y, phi);
+          if (y < TIP_KILL_Y) break;
+        }
+        t += dt;
+      }
+      return { frames, dt, count: frames.length / 3 };
+    }
+
+    // Vận tốc góc ban đầu để sau khi lăn lên cạnh, trọng tâm đi qua mép với tốc độ TIP_EXIT_OMEGA (bảo toàn năng lượng)
+    function hingeStartOmega(W, H, exitOmega = TIP_EXIT_OMEGA) {
+      const r2 = (W * W + H * H) / 4, r = Math.sqrt(r2), k2 = (W * W + H * H) / 12;
+      return Math.sqrt(exitOmega * exitOmega + 2 * GRAVITY_ACCEL * (r - H / 2) / (k2 + r2));
+    }
+
+    // Danh sách các tấm gạch (khoảng [sa, sb] theo trục lật, gốc tại bản lề) mà khối có thể va chạm khi rơi.
+    // Chỉ lấy ô gạch đang đỡ thật sự (theo trạng thái cũ) nằm trên cùng "làn" với khối; bỏ qua gạch sắp biến mất.
+    function buildTipSlabs(pivot, tdir, spec, state, skipKeys) {
+      const alongX = tdir.x !== 0;
+      const pivotAxis = alongX ? pivot.x : pivot.z;
+      const sign = alongX ? tdir.x : tdir.z;
+      const latCenter = alongX ? spec.cz : spec.cx;
+      const latSize = alongX ? spec.d : spec.w;
+      const lanes = [];
+      for (let L = Math.floor(latCenter - latSize / 2); L <= Math.ceil(latCenter + latSize / 2); L++) {
+        if (Math.abs(L - latCenter) < latSize / 2) lanes.push(L);
+      }
+      const slabs = [];
+      for (let i = Math.floor(pivotAxis) - 5; i <= Math.ceil(pivotAxis) + 6; i++) {
+        const sc = (i - pivotAxis) * sign;
+        if (sc < -4 || sc > 6) continue;
+        const hasTile = lanes.some(L => {
+          const r = alongX ? L : i, c = alongX ? i : L;
+          return !skipKeys.has(`${r},${c}`) && isCellSupported(r, c, state);
+        });
+        if (hasTile) slabs.push([sc - TILE_SIZE / 2, sc + TILE_SIZE / 2]);
+      }
+      slabs.sort((p, q) => p[0] - q[0]);
+      const merged = [];
+      for (const s of slabs) {
+        const last = merged[merged.length - 1];
+        if (last && s[0] - last[1] < 0.05) last[1] = Math.max(last[1], s[1]);
+        else merged.push([s[0], s[1]]);
+      }
+      return merged;
+    }
+
+    // Đặt Group theo (x, y, phi) của mô phỏng: pivot là điểm bản lề (thế giới), tdir là hướng lật
+    function applyTipTransform(group, pivot, tdir, x, y, phi) {
+      group.position.set(pivot.x + tdir.x * x, BOARD_TOP_Y + y, pivot.z + tdir.z * x);
+      group.rotation.set(0, 0, 0);
+      if (tdir.x !== 0) group.rotation.z = -tdir.x * phi;
+      else group.rotation.x = tdir.z * phi;
+    }
+
+    // Hoạt ảnh rơi khi thất bại, sau đó khối mới rơi từ trên trời xuống tại điểm xuất phát
+    async function animateInvalidFall(state, action, reasonText) {
+      const myToken = sessionToken;
+      document.getElementById('status-text').innerText = '❌ ' + reasonText;
+
+      if (!['UP', 'DOWN', 'LEFT', 'RIGHT'].includes(action)) {
+        return;
+      }
+
+      animState = AnimState.MOVING;
+      blockGroup.clear();
+
+      let startSpec = null;
+      if (state.orientation === 3) {
+        const movingCube = state.active_cube || 0;
+        const staticCube = movingCube === 0 ? 1 : 0;
+        const staticSplitMesh = createBlockMeshFromSpec(getBoxSpec(state, staticCube));
+        blockGroup.add(staticSplitMesh);
+        startSpec = getBoxSpec(state, movingCube);
+      } else {
+        startSpec = getBoxSpec(state, 0);
+      }
+
+      const tdirMap = { RIGHT: { x: 1, z: 0 }, LEFT: { x: -1, z: 0 }, DOWN: { x: 0, z: 1 }, UP: { x: 0, z: -1 } };
+      const landing = computeHypotheticalLanding(state, action);
+      const cells = landing.cells;
+
+      // ---- Phân loại tình huống rơi ----
+      //  'rolloff': lăn hẳn ra ngoài vực -> xoay quanh mép gạch rồi trượt khỏi mép
+      //  'tip'    : nằm vắt ngang mép (chỉ 1 ô có gạch đỡ) -> nghiêng quanh mép gạch về phía vực
+      //  'drop'   : gạch ngay dưới khối biến mất (gạch cam vỡ / cầu đóng) -> khối + gạch rơi thẳng đứng
+      const dropMeshes = [];
+      const dropKeys = new Set();
+      let mode = 'drop';
+      let keepIdx = -1;
+      const oldSup = cells.map(([r, c]) => isCellSupported(r, c, state));
+
+      if (oldSup.every(Boolean)) {
+        const keep = [];
+        cells.forEach(([r, c], i) => {
+          const key = `${r},${c}`;
+          const isBridge = levelData.bridge_cells[key] !== undefined;
+          const isFragile = landing.orientation === 0 && levelData.grid[r][c] === 2;
+          if (isBridge || isFragile) {
+            const m = tileMeshMap[key];
+            if (m) dropMeshes.push(m);
+            dropKeys.add(key);
+          } else {
+            keep.push(i);
+          }
+        });
+        if (cells.length === 2 && keep.length === 1) { mode = 'tip'; keepIdx = keep[0]; }
+      } else {
+        const sup = [];
+        oldSup.forEach((ok, i) => { if (ok) sup.push(i); });
+        if (sup.length === 0) mode = 'rolloff';
+        else if (cells.length === 2 && sup.length === 1) { mode = 'tip'; keepIdx = sup[0]; }
+      }
+
+      const dropStartY = dropMeshes.map(m => m.position.y);
+      const dropTiles = (elapsedSec, alpha) => {
+        const d = 0.5 * GRAVITY_ACCEL * elapsedSec * elapsedSec;
+        dropMeshes.forEach((m, i) => {
+          m.position.y = dropStartY[i] - d;
+          m.rotation.set(0, 0, 0);
+          if (alpha < 1) setObjectOpacity(m, alpha);
+        });
+      };
+      const cleanupTiles = () => dropMeshes.forEach(m => { m.visible = false; });
+
+      // Chạy mô phỏng vật lý rồi phát lại; trả về false nếu bị hủy (Reset màn)
+      const playPhysics = async (sim, body, pivot, tdir) => {
+        const totalMs = sim.count * sim.dt * 1000 + 30;
+        // Đặt ngay tư thế khung đầu tiên để không bị nhấp nháy tại gốc tọa độ trước khi tween chạy
+        applyTipTransform(body, pivot, tdir, sim.frames[0], sim.frames[1], sim.frames[2]);
+        return runTween(totalMs, (p, elapsedSec) => {
+          const i = Math.min(sim.count - 1, Math.floor(elapsedSec / sim.dt));
+          const x = sim.frames[i * 3], y = sim.frames[i * 3 + 1], phi = sim.frames[i * 3 + 2];
+          applyTipTransform(body, pivot, tdir, x, y, phi);
+          // Mờ dần khi đã rơi sâu dưới mặt bàn
+          let alpha = Math.max(0, Math.min(1, 1 - (-y - 1.4) / 2.8));
+          if (elapsedSec > 1.3) alpha = Math.min(alpha, Math.max(0, 1 - (elapsedSec - 1.3) / 0.25)); // lưới an toàn: luôn biến mất
+          setObjectOpacity(body, alpha);
+          dropTiles(elapsedSec, alpha);
+        }, myToken);
+      };
+
+      if (mode === 'rolloff') {
+        // Khối lăn qua mép và tiếp tục xoay quanh mép gạch đỡ nó (không dừng ở 90 độ rồi rơi thẳng)
+        const tdir = tdirMap[action];
+        const W = tdir.x !== 0 ? startSpec.w : startSpec.d;
+        const H = startSpec.h;
+        const pivot = { x: startSpec.cx + tdir.x * W / 2, z: startSpec.cz + tdir.z * W / 2 };
+        const slabs = buildTipSlabs(pivot, tdir, startSpec, state, dropKeys);
+        const sim = simulateTipFall({ W, H, u0: -W, u1: 0, phi0: 0, omega0: hingeStartOmega(W, H), slabs });
+
+        const body = new THREE.Group();
+        body.add(createBlockMeshFromSpec({ ...startSpec, cx: 0, cy: 0, cz: 0 }));
+        blockGroup.add(body);
+        animState = AnimState.FALLING;
+
+        const ok = await playPhysics(sim, body, pivot, tdir);
+        if (!ok) return;
+        blockGroup.remove(body);
+      } else {
+        // Bước 1: lăn 90 độ vào vị trí tiếp đất (ô gây thua)
+        const { pivot: rollPivot, axis, targetAngle } = buildRollingPivot(startSpec, action);
+        blockGroup.add(rollPivot);
+
+        let okRoll;
+        if (mode === 'tip') {
+          // Lăn đến nơi vẫn còn chút vận tốc góc để chuyển động nối tiếp tự nhiên sang giai đoạn nghiêng
+          const T = 200, wEnd = TIP_START_OMEGA;
+          const m = wEnd * (T / 1000) / (Math.PI / 2);
+          okRoll = await runTween(T, (p) => {
+            const sCurve = (m - 2) * p * p * p + (3 - m) * p * p;
+            rollPivot.rotation[axis] = targetAngle * sCurve;
+          }, myToken);
+        } else {
+          okRoll = await runTween(190, (p) => {
+            rollPivot.rotation[axis] = targetAngle * easeInOutQuad(p);
+          }, myToken);
+        }
+        if (!okRoll) return;
+
+        animState = AnimState.FALLING;
+        blockGroup.remove(rollPivot);
+
+        if (mode === 'tip') {
+          // Khối nằm vắt ngang mép: nghiêng quanh mép gạch đỡ về phía ô trống (hoặc ô gạch sắp biến mất)
+          const sup = cells[keepIdx], uns = cells[1 - keepIdx];
+          const tdir = { x: uns[1] - sup[1], z: uns[0] - sup[0] }; // (dc, dr)
+          const spec = landing.spec;
+          const pivot = { x: spec.cx, z: spec.cz };              // Mép giữa 2 ô = tâm khối nằm
+          const W = 2, H = spec.h;
+          const slabs = buildTipSlabs(pivot, tdir, spec, state, dropKeys);
+          const sim = simulateTipFall({ W, H, u0: -W / 2, u1: W / 2, phi0: 0, omega0: TIP_START_OMEGA, slabs, allowNarrowClip: true });
+
+          const body = new THREE.Group();
+          body.add(createBlockMeshFromSpec({ ...spec, cx: 0, cy: 0, cz: 0 }));
+          blockGroup.add(body);
+
+          const ok = await playPhysics(sim, body, pivot, tdir);
+          if (!ok) return;
+          blockGroup.remove(body);
+        } else {
+          // Gạch dưới khối vỡ / cầu đóng: khối và gạch rơi thẳng đứng cùng nhau (không xoay)
+          const fallGroup = new THREE.Group();
+          fallGroup.position.set(landing.spec.cx, landing.spec.cy, landing.spec.cz);
+          fallGroup.add(createBlockMeshFromSpec({ ...landing.spec, cx: 0, cy: 0, cz: 0 }));
+          blockGroup.add(fallGroup);
+
+          const fixedX = landing.spec.cx, startY = landing.spec.cy, fixedZ = landing.spec.cz;
+          const okFall = await runTween(400, (p, elapsedSec) => {
+            const dropDist = 0.5 * GRAVITY_ACCEL * elapsedSec * elapsedSec;
+            fallGroup.position.set(fixedX, startY - dropDist, fixedZ);
+            fallGroup.rotation.set(0, 0, 0);
+            let alpha = 1;
+            if (p > 0.55) {
+              alpha = Math.max(0, 1 - (p - 0.55) / 0.45);
+              setObjectOpacity(fallGroup, alpha);
+            }
+            dropTiles(elapsedSec, alpha);
+          }, myToken);
+          if (!okFall) return;
+          blockGroup.remove(fallGroup);
+        }
+      }
+
+      // Xóa khối vừa rơi khỏi tầm nhìn và thả khối mới từ trên trời xuống tại ô bắt đầu
+      cleanupTiles();
+      await autoResetCurrentLevel('Đang chơi (Đã tự động đặt lại sau khi rơi)');
+    }
+
+    // Hoạt ảnh chiến thắng (VICTORY_FALLING), sau đó thả khối mới từ trên trời xuống
+    async function animateVictory(statusMessage) {
+      if (!currentState || !currentState.is_goal) return;
+      animState = AnimState.VICTORY_FALLING;
+      const myToken = sessionToken;
+
+      document.getElementById('status-text').innerText = statusMessage;
+
+      blockGroup.clear();
+      const spec = getBoxSpec(currentState, 0);
+      const goalBlockMesh = createBlockMeshFromSpec(spec);
+      goalBlockMesh.rotation.set(0, 0, 0);
+      blockGroup.add(goalBlockMesh);
+
+      const fixedX = spec.cx;
+      const startY = spec.cy;
+      const fixedZ = spec.cz;
+
+      // Nhịp dừng rất ngắn (120ms) tại vị trí đứng cuối cùng trên ô đích
+      const okPause = await runTween(120, () => {}, myToken);
+      if (!okPause) return;
+
+      // Rơi thẳng đứng xuống dưới với gia tốc trọng lực, không xoay, không trượt ngang
+      const okFall = await runTween(400, (p, elapsedSec) => {
+        const dropDist = 0.5 * GRAVITY_ACCEL * elapsedSec * elapsedSec;
+        goalBlockMesh.position.set(fixedX, startY - dropDist, fixedZ);
+        goalBlockMesh.rotation.set(0, 0, 0);
+
+        if (p > 0.55) {
+          const alpha = Math.max(0, 1 - (p - 0.55) / 0.45);
+          setObjectOpacity(goalBlockMesh, alpha);
+        }
+      }, myToken);
+      if (!okFall) return;
+
+      // Xóa hoàn toàn mô hình khối tại ô đích và thả khối mới từ trên trời xuống
+      blockGroup.clear();
+      await autoResetCurrentLevel(`${statusMessage} — Đã tự động bắt đầu lại`);
+    }
+
+    // Xử lý tuần tự hàng đợi di chuyển của người chơi
+    async function processMoveQueue() {
+      if (animState !== AnimState.IDLE || isSolverRunning) return;
+      const myToken = sessionToken;
+
+      while (moveQueue.length > 0 && myToken === sessionToken) {
+        if (!currentState || currentState.is_goal) {
+          moveQueue = [];
+          break;
+        }
+
+        const action = moveQueue.shift();
+        const filename = document.getElementById('level-select').value;
+        const prevState = currentState;
+
+        animState = AnimState.MOVING;
+        let res, data;
+        try {
+          res = await fetch('/api/move', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ level: filename, state: currentState, action })
+          });
+          data = await res.json();
+        } catch (err) {
+          animState = AnimState.IDLE;
+          break;
+        }
+        if (myToken !== sessionToken) return;
+
+        if (!data.valid) {
+          moveQueue = [];
+          await animateInvalidFall(prevState, action, data.reason);
+          return;
+        }
+
+        currentState = data.state;
+        moveCount++;
+        document.getElementById('moves-count').innerText = moveCount;
+        document.getElementById('status-text').innerText = 'Đang chơi';
+
+        await animateValidMove(prevState, currentState, action, 200);
+        if (myToken !== sessionToken) return;
+
+        if (currentState.is_goal) {
+          moveQueue = [];
+          await animateVictory('🎉 CHIẾN THẮNG!');
+          return;
+        }
+
+        animState = AnimState.IDLE;
+      }
+
+      if (myToken === sessionToken) {
+        animState = AnimState.IDLE;
+      }
+    }
+
+    function onKeyDown(e) {
       const keyMap = {
         ArrowUp: 'UP', ArrowDown: 'DOWN', ArrowLeft: 'LEFT', ArrowRight: 'RIGHT', ' ': 'SWITCH_CUBE'
       };
-      if (!keyMap[e.key] || !currentState || currentState.is_goal) return;
-      e.preventDefault();
+      const action = keyMap[e.key];
+      if (!action || !currentState || currentState.is_goal || isSolverRunning) return;
 
-      const filename = document.getElementById('level-select').value;
-      const res = await fetch('/api/move', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ level: filename, state: currentState, action: keyMap[e.key] })
-      });
-      const data = await res.json();
-      if (!data.valid) {
-        document.getElementById('status-text').innerText = '❌ ' + data.reason;
+      // Chặn phím khi khối đang rơi từ trên trời xuống (SPAWNING), đang rơi vực hoặc cầu đang đóng/mở
+      if (
+        animState === AnimState.SPAWNING ||
+        animState === AnimState.FALLING ||
+        animState === AnimState.VICTORY_FALLING ||
+        animState === AnimState.BRIDGE_ANIMATING
+      ) {
         return;
       }
-      currentState = data.state;
-      moveCount++;
-      document.getElementById('moves-count').innerText = moveCount;
-      renderBoardAndBlock();
 
-      if (currentState.is_goal) {
-        document.getElementById('status-text').innerText = '🎉 CHIẾN THẮNG!';
+      e.preventDefault();
+
+      if (moveQueue.length < 1) {
+        moveQueue.push(action);
+      }
+      if (animState === AnimState.IDLE) {
+        processMoveQueue();
       }
     }
 
+    // Chạy thuật toán tìm đường và tự động diễn hoạt từng bước về đích
     async function runSolver(algo) {
-      if (animTimer) clearInterval(animTimer);
+      resetAnimationSystem();
+      const myToken = sessionToken;
+      isSolverRunning = true;
+      animState = AnimState.MOVING;
+
       const filename = document.getElementById('level-select').value;
       document.getElementById('status-text').innerText = `⏳ Đang giải bằng ${algo.toUpperCase()}...`;
 
@@ -340,8 +1414,11 @@
         body: JSON.stringify({ level: filename, algo })
       });
       const data = await res.json();
+      if (myToken !== sessionToken) return;
 
       if (!res.ok) {
+        isSolverRunning = false;
+        animState = AnimState.IDLE;
         alert(data.error);
         document.getElementById('status-text').innerText = '⚠️ Chưa cài đặt thuật toán này';
         return;
@@ -352,22 +1429,46 @@
       document.getElementById('mem-count').innerText = data.peak_memory_kb + ' KB';
 
       if (!data.solved) {
+        isSolverRunning = false;
+        animState = AnimState.IDLE;
         document.getElementById('status-text').innerText = '❌ Không tìm thấy lời giải!';
         return;
       }
 
       document.getElementById('status-text').innerText = `🤖 Đang tự động lăn (${data.solution_length} bước)...`;
-      let step = 0;
-      animTimer = setInterval(() => {
-        currentState = data.trace[step];
+
+      currentState = JSON.parse(JSON.stringify(data.trace[0]));
+      moveCount = 0;
+      document.getElementById('moves-count').innerText = '0';
+
+      if (bridgeAnimGroup) bridgeAnimGroup.clear();
+      renderBoardOnly(currentState);
+
+      // Thả khối từ trên trời xuống điểm xuất phát trước khi bắt đầu chuỗi tự động lăn
+      const okSpawn = await animateSpawnBlock(currentState, myToken);
+      if (!okSpawn || myToken !== sessionToken) return;
+
+      for (let step = 1; step < data.trace.length; step++) {
+        if (myToken !== sessionToken) return;
+        const prevState = data.trace[step - 1];
+        const nextState = data.trace[step];
+        const { action, movingCube } = inferActionFromStates(prevState, nextState);
+
+        currentState = JSON.parse(JSON.stringify(nextState));
+        moveCount = step;
         document.getElementById('moves-count').innerText = step;
-        renderBoardAndBlock();
-        step++;
-        if (step >= data.trace.length) {
-          clearInterval(animTimer);
-          document.getElementById('status-text').innerText = `🎉 Đã tới đích (${algo.toUpperCase()})!`;
-        }
-      }, 350);
+
+        await animateValidMove(prevState, nextState, action, 210, movingCube);
+      }
+
+      if (myToken !== sessionToken) return;
+
+      if (currentState && currentState.is_goal) {
+        await animateVictory(`🎉 Đã tới đích (${algo.toUpperCase()})!`);
+      } else {
+        isSolverRunning = false;
+        animState = AnimState.IDLE;
+      }
     }
 
     init3D();
