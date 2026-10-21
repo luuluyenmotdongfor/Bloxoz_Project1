@@ -56,4 +56,8 @@ class State:
 
     def __lt__(self, other):
         # Hỗ trợ so sánh trong PriorityQueue (heapq) của UCS và A* khi có cùng độ ưu tiên
+        if self.orientation == Orientation.SPLIT and other.orientation != Orientation.SPLIT:
+            return True
+        if self.orientation != Orientation.SPLIT and other.orientation == Orientation.SPLIT:
+            return False
         return self._key() < other._key()

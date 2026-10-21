@@ -1,5 +1,6 @@
 from solvers.base_solver import BaseSolver
 import heapq
+from core.state import Orientation
 class UCSSolver(BaseSolver):
 
 
@@ -35,4 +36,15 @@ class UCSSolver(BaseSolver):
 
 
     def _get_step_cost(self, action, next_state):
-        return 1
+        state_cost = 1
+        block_cost = 0
+
+        if next_state.orientation == 3:
+            state_cost += 2
+        if not all(next_state.bridges_mask): 
+            state_cost += 2
+        for r, c in next_state.get_occupied_cells():
+            if self.board.grid[r][c] == 2:
+                block_cost += 4
+                break
+        return state_cost + block_cost
