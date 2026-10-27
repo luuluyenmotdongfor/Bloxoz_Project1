@@ -36,15 +36,15 @@ class UCSSolver(BaseSolver):
 
 
     def _get_step_cost(self, action, next_state):
-        state_cost = 1
-        block_cost = 0
+        state_cost = 0
+        block_cost = 1
 
         if next_state.orientation == 3:
             state_cost += 2
-        if not all(next_state.bridges_mask): 
-            state_cost += 2
+        closed_bridges = next_state.bridges_mask.count(False)
+        state_cost += closed_bridges * 0.1
         for r, c in next_state.get_occupied_cells():
             if self.board.grid[r][c] == 2:
-                block_cost += 4
+                block_cost += 2
                 break
         return state_cost + block_cost
