@@ -1,44 +1,65 @@
 import time
 import tracemalloc
 from abc import ABC, abstractmethod
-from typing import List, Dict, Any, Optional
-from core.board import Board
+
+
+class SearchLimit(Exception):
+    pass
+
 
 class BaseSolver(ABC):
-    def __init__(self, board: Board):
+    def __init__(self, board, time_limit=None, node_limit=None):
         self.board = board
+        self.time_limit = time_limit
+        self.node_limit = node_limit
         self.expanded_nodes = 0
+        self.status = "UNSOLVABLE"
+        self._deadline = None
 
-    def solve(self) -> Dict[str, Any]:
-        """
-        Hàm chuẩn gọi từ GUI hoặc từ script Benchmark.
-        Tự động đo Search Time và Peak Memory Usage (KB).
-        """
+    def _check_time(self):
+        if self._deadline is not None and time.perf_counter() >= self._deadline:
+            raise SearchLimit("TIME_LIMIT")
+
+    def _successors(self, state):
+        self._check_time()
+        if self.node_limit is not None and self.expanded_nodes >= self.node_limit:
+            raise SearchLimit("NODE_LIMIT")
+        self.expanded_nodes += 1
+        return self.board.get_successors(state)
+
+    def solve(self):
         self.expanded_nodes = 0
+        self.status = "UNSOLVABLE"
+        actions = None
         tracemalloc.start()
-        start_time = time.perf_counter()
-
-        actions = self._search()
-
-        end_time = time.perf_counter()
-        _, peak_memory_bytes = tracemalloc.get_traced_memory()
-        tracemalloc.stop()
-
+        start = time.perf_counter()
+        self._deadline = start + self.time_limit if self.time_limit is not None else None
+        try:
+            if not self.board.is_valid_state(self.board.get_initial_state()):
+                raise ValueError("Invalid initial state")
+            actions = self._search()
+            self._check_time()
+            if actions is not None:
+                self.status = "OK"
+        except SearchLimit as exc:
+            actions = None
+            self.status = str(exc)
+        finally:
+            elapsed = time.perf_counter() - start
+            _, peak = tracemalloc.get_traced_memory()
+            tracemalloc.stop()
+            self._deadline = None
         return {
+            "status": self.status,
             "solved": actions is not None,
             "actions": actions if actions is not None else [],
             "solution_length": len(actions) if actions is not None else 0,
             "expanded_nodes": self.expanded_nodes,
-            "search_time_sec": round(end_time - start_time, 6),
-            "peak_memory_kb": round(peak_memory_bytes / 1024, 2)
+            "search_time_sec": elapsed,
+            "peak_memory_kb": peak / 1024,
+            "peak_memory_kib": peak / 1024,
         }
 
     @abstractmethod
-    def _search(self) -> Optional[List[str]]:
-        """
-        Các class con (BFS, DFS, UCS, A*) cài đặt thuật toán tại đây.
-        Mỗi khi lấy 1 node ra khỏi hàng đợi (frontier) để mở rộng, nhớ gọi:
-            self.expanded_nodes += 1
-        Trả về danh sách các bước đi (VD: ['RIGHT', 'DOWN', ...]) hoặc None nếu vô nghiệm.
-        """
+    def _search(self):
         pass

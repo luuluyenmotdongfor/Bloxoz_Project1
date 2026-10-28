@@ -1,6 +1,3 @@
-from typing import Dict, List, Optional, Set, Tuple
-
-from core.state import State
 from solvers.base_solver import BaseSolver
 
 
@@ -8,87 +5,46 @@ MAX_DEPTH = 50
 
 
 class IDSSolver(BaseSolver):
+    def __init__(self, board, time_limit=None, node_limit=None, max_depth=MAX_DEPTH):
+        super().__init__(board, time_limit, node_limit)
+        self.max_depth = max_depth
 
-    def _search(self) -> Optional[List[str]]:
-        start_state = self.board.get_initial_state()
-        if self.board.is_goal(start_state):
+    def _search(self):
+        start = self.board.get_initial_state()
+        if self.board.is_goal(start):
             return []
-
-        for depth_limit in range(MAX_DEPTH + 1):
-            path: List[str] = []
-            path_states: Set[State] = {start_state}
-            best_depth: Dict[State, int] = {}
-
-            solution, cutoff = self._depth_limited_search(
-                state=start_state,
-                depth_limit=depth_limit,
-                current_depth=0,
-                path=path,
-                path_states=path_states,
-                best_depth=best_depth,
-            )
-
+        for limit in range(self.max_depth + 1):
+            solution, cutoff = self._dls(start, 0, limit, [], {start}, {})
             if solution is not None:
                 return solution
             if not cutoff:
                 return None
-
-        # Không tìm thấy đáp án trong giới hạn độ sâu cho phép (depth limit).
+        self.status = "DEPTH_LIMIT"
         return None
 
-    def _depth_limited_search(
-        self,
-        state: State,
-        depth_limit: int,
-        current_depth: int,
-        path: List[str],
-        path_states: Set[State],
-        best_depth: Dict[State, int],
-    ) -> Tuple[Optional[List[str]], bool]:
+    def _dls(self, state, depth, limit, path, on_path, best_depth):
+        self._check_time()
         if self.board.is_goal(state):
             return list(path), False
-
-        previous_depth = best_depth.get(state)
-        if previous_depth is not None and previous_depth <= current_depth:
+        if best_depth.get(state, float("inf")) <= depth:
             return None, False
-
-        if current_depth == depth_limit:
-            # Tiếp tục nếu không tạo thành chu trình (vòng lặp) trên đường đi hiện tại,
-            # nhưng sẽ không mở rộng (expand) nút này thêm nữa.
-            has_unvisited_successor = any(
-                next_state not in path_states
-                for _, next_state in self.board.get_successors(state)
-            )
-            if has_unvisited_successor:
-                self.expanded_nodes += 1
-            return None, has_unvisited_successor
-
-        best_depth[state] = current_depth
-        self.expanded_nodes += 1
+        if depth == limit:
+            cutoff = any(next_state not in on_path
+                         for _, next_state in self._successors(state))
+            return None, cutoff
+        best_depth[state] = depth
         cutoff = False
-
-        for action, next_state in self.board.get_successors(state):
-            # Tránh lặp chu trình trên đường đi hiện tại; các trạng thái này
-            # sẽ được xét lại ở các vòng lặp giới hạn độ sâu tiếp theo, nơi
-            # mà một đường đi dài hơn có thể sẽ là cần thiết.
-            if next_state in path_states:
+        for action, next_state in self._successors(state):
+            if next_state in on_path:
                 continue
-
             path.append(action)
-            path_states.add(next_state)
-            solution, child_cutoff = self._depth_limited_search(
-                state=next_state,
-                depth_limit=depth_limit,
-                current_depth=current_depth + 1,
-                path=path,
-                path_states=path_states,
-                best_depth=best_depth,
+            on_path.add(next_state)
+            solution, child_cutoff = self._dls(
+                next_state, depth + 1, limit, path, on_path, best_depth
             )
-            path_states.remove(next_state)
+            on_path.remove(next_state)
             path.pop()
-
             if solution is not None:
                 return solution, False
             cutoff = cutoff or child_cutoff
-
         return None, cutoff

@@ -1,52 +1,65 @@
-﻿import os
-import sys
-
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, BASE_DIR)
-
+import argparse
+import time
+from collections import deque
+from pathlib import Path
 from core.board import Board
+from core.state import Orientation
 from solvers.bfs_solver import BFSSolver
+from validation import configuration_errors, replay_solution
 
-def validate_all_levels():
-    levels_dir = os.path.join(BASE_DIR, "levels")
-    files = sorted([f for f in os.listdir(levels_dir) if f.endswith(".json")])
 
-    print("=" * 95)
-    print(f"{'File':<15} | {'Difficulty':<12} | {'Status':<10} | {'Min Moves':<10} | {'Expanded Nodes':<15} | {'Features'}")
-    print("=" * 95)
+def split_coverage(board, seconds, node_limit):
+    expected = {cell for cell, switch in board.switches.items() if switch["type"] == "split"}
+    reached = set()
+    start = board.get_initial_state()
+    queue, seen = deque([start]), {start}
+    deadline, expanded = time.perf_counter() + seconds, 0
+    while queue and reached != expected:
+        if time.perf_counter() >= deadline or expanded >= node_limit:
+            return "LIMIT", sorted(reached), sorted(expected - reached)
+        state = queue.popleft()
+        expanded += 1
+        for action, next_state in board.get_successors(state):
+            if state.orientation != Orientation.SPLIT and next_state.orientation == Orientation.SPLIT:
+                intermediate = board._apply_move(state, action)
+                reached.add((intermediate.r, intermediate.c))
+            if next_state not in seen:
+                seen.add(next_state)
+                queue.append(next_state)
+    status = "ALL_REACHED" if reached == expected else "UNREACHABLE"
+    return status, sorted(reached), sorted(expected - reached)
 
-    valid_count = 0
-    for f in files:
-        path = os.path.join(levels_dir, f)
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--coverage", action="store_true")
+    parser.add_argument("--time-limit", type=float, default=10)
+    parser.add_argument("--node-limit", type=int, default=250000)
+    args = parser.parse_args()
+    if args.time_limit <= 0 or args.node_limit < 1:
+        parser.error("Search limits must be positive")
+    failures = 0
+    for path in sorted((Path(__file__).parent / "levels").glob("*.json")):
         try:
-            board = Board(path)
-            solver = BFSSolver(board)
-            res = solver.solve()
+            board = Board(str(path))
+            errors = configuration_errors(board)
+            if errors:
+                raise ValueError("; ".join(errors))
+            result = BFSSolver(board, args.time_limit, args.node_limit).solve()
+            details = replay_solution(board, result["actions"]) if result["solved"] else {}
+            print(path.name, result["status"], details)
+            if result["status"] != "OK":
+                failures += 1
+            if args.coverage:
+                status, reached, missing = split_coverage(board, args.time_limit, args.node_limit)
+                print("  Split coverage:", status, "reached=", reached, "missing=", missing)
+                if status != "ALL_REACHED":
+                    failures += 1
+        except Exception as exc:
+            failures += 1
+            print(path.name, "ERROR", str(exc))
+    return int(failures > 0)
 
-            has_fragile = any(2 in row for row in board.grid)
-            sw_types = sorted(list({sw["type"] for sw in board.switches.values()}))
-            features = []
-            if has_fragile:
-                features.append("fragile")
-            if board.bridge_ids:
-                features.append(f"bridges({len(board.bridge_ids)})")
-            if sw_types:
-                features.append("switches:" + ",".join(sw_types))
-            feat_str = ", ".join(features) if features else "basic_only"
-
-            if res["solved"] and res["solution_length"] > 0:
-                status = "✅ SOLVABLE"
-                valid_count += 1
-            else:
-                status = "❌ UNSOLVABLE"
-
-            diff = getattr(board, "name", "")[:10]
-            print(f"{f:<15} | {diff:<12} | {status:<10} | {res['solution_length']:<10} | {res['expanded_nodes']:<15} | {feat_str}")
-        except Exception as e:
-            print(f"{f:<15} | {'ERROR':<12} | ❌ CRASH   | {'-':<10} | {'-':<15} | Lỗi JSON: {e}")
-
-    print("=" * 95)
-    print(f"Tổng kết: {valid_count}/{len(files)} màn chơi hợp lệ và chắc chắn giải được (Yêu cầu tối thiểu: 10 màn).")
 
 if __name__ == "__main__":
-    validate_all_levels()
+    raise SystemExit(main())
