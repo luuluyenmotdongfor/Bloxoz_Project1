@@ -16,7 +16,7 @@ def get_step_cost(board, next_state):
     return state_cost + block_cost
 
 class Heuristic:
-    def __init__(self, board, check_time=lambda: None):
+    def __init__(self, board):
         self.board = board
         predecessors = {}
         for source, switch in board.switches.items():
@@ -27,7 +27,6 @@ class Heuristic:
         self.distance = {goal: 0}
         queue = [(0, goal)]
         while queue:
-            check_time()
             distance, cell = heapq.heappop(queue)
             if distance != self.distance[cell]:
                 continue
