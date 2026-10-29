@@ -1,0 +1,14 @@
+# Bỏ qua các file biên dịch và bộ nhớ đệm của Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Bỏ qua file tạm của trình soạn thảo Vim
+*.swp
+.*.swp
+
+# Bỏ qua thư mục môi trường ảo Anaconda/Python (nếu có)
+venv/
+env/
+.conda/
