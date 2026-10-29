@@ -17,11 +17,13 @@ class UCSSolver(BaseSolver):
             if current_state in visited:
                 continue
             visited.add(current_state)
-            self.expanded_nodes += 1
 
             if self.board.is_goal(current_state):
                 return path
 
+            if self._limit_reached():
+                return None
+            self.expanded_nodes += 1
             successors = self.board.get_successors(current_state)
 
             for action, next_state in successors:

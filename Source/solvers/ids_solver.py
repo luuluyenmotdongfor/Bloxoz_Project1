@@ -30,10 +30,13 @@ class IDSSolver(BaseSolver):
 
             if solution is not None:
                 return solution
+            if self.status != "UNSOLVABLE":
+                return None
             if not cutoff:
                 return None
 
         # Không tìm thấy đáp án trong giới hạn độ sâu cho phép (depth limit).
+        self.status = "DEPTH_LIMIT"
         return None
 
     def _depth_limited_search(
@@ -52,15 +55,16 @@ class IDSSolver(BaseSolver):
         if previous_depth is not None and previous_depth <= current_depth:
             return None, False
 
+        if self._limit_reached():
+            return None, False
+
         if current_depth == depth_limit:
-            # Tiếp tục nếu không tạo thành chu trình (vòng lặp) trên đường đi hiện tại,
-            # nhưng sẽ không mở rộng (expand) nút này thêm nữa.
+            # Kiểm tra xem còn nhánh cần xét ở vòng lặp sâu hơn không.
+            self.expanded_nodes += 1
             has_unvisited_successor = any(
                 next_state not in path_states
                 for _, next_state in self.board.get_successors(state)
             )
-            if has_unvisited_successor:
-                self.expanded_nodes += 1
             return None, has_unvisited_successor
 
         best_depth[state] = current_depth
@@ -89,6 +93,8 @@ class IDSSolver(BaseSolver):
 
             if solution is not None:
                 return solution, False
+            if self.status != "UNSOLVABLE":
+                return None, False
             cutoff = cutoff or child_cutoff
 
         return None, cutoff
