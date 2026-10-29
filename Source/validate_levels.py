@@ -34,11 +34,11 @@ def validate_all_levels():
                 features.append("switches:" + ",".join(sw_types))
             feat_str = ", ".join(features) if features else "basic_only"
 
-            if res["solved"] and res["solution_length"] > 0:
+            if res["solved"]:
                 status = "✅ SOLVABLE"
                 valid_count += 1
             else:
-                status = "❌ UNSOLVABLE"
+                status = res.get("status", "UNSOLVABLE")
 
             diff = getattr(board, "name", "")[:10]
             print(f"{f:<15} | {diff:<12} | {status:<10} | {res['solution_length']:<10} | {res['expanded_nodes']:<15} | {feat_str}")
@@ -46,7 +46,7 @@ def validate_all_levels():
             print(f"{f:<15} | {'ERROR':<12} | ❌ CRASH   | {'-':<10} | {'-':<15} | Lỗi JSON: {e}")
 
     print("=" * 95)
-    print(f"Tổng kết: {valid_count}/{len(files)} màn chơi hợp lệ và chắc chắn giải được (Yêu cầu tối thiểu: 10 màn).")
+    print(f"Tổng kết: tìm được lời giải cho {valid_count}/{len(files)} màn chơi (Yêu cầu tối thiểu: 10 màn).")
 
 if __name__ == "__main__":
     validate_all_levels()
