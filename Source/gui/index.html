@@ -7,63 +7,166 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
   <style>
-    body { margin: 0; overflow: hidden; font-family: 'Segoe UI', sans-serif; background: #1a0905; color: #fff; }
+    body { margin: 0; overflow: hidden; font-family: 'Segoe UI', sans-serif; background: #05060f; color: #fff; }
     
-    /* Bảng điều khiển bên trái có hiệu ứng trượt thu gọn */
+    /* Bảng điều khiển thuật toán bên trái với hiệu ứng trong suốt (Glassmorphism & Backdrop Blur) */
     #ui-panel {
       position: absolute; top: 15px; left: 15px; z-index: 10;
-      background: rgba(20, 20, 28, 0.90); padding: 14px 16px; border-radius: 10px;
-      border: 1px solid #444; width: 300px; box-shadow: 0 4px 15px rgba(0,0,0,0.6);
+      background: rgba(18, 18, 30, 0.65);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      padding: 14px 16px; border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      width: 300px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
       user-select: none;
-      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+    }
+    #ui-panel:hover {
+      background: rgba(20, 20, 34, 0.82);
+      border-color: rgba(255, 255, 255, 0.25);
+      box-shadow: 0 10px 36px rgba(0, 0, 0, 0.55);
     }
     #ui-panel.collapsed {
       transform: translateX(calc(-100% - 15px));
     }
 
-    /* Nút đóng/mở bảng điều khiển nằm bên cạnh phải của panel */
+    /* Nút đóng/mở bảng điều khiển nằm bên cạnh phải của panel, đồng bộ hiệu ứng kính */
     #toggle-panel-btn {
       position: absolute; top: 12px; right: -36px;
       width: 34px; height: 36px; margin: 0; padding: 0;
-      background: rgba(20, 20, 28, 0.90); color: #ff9f43;
-      border: 1px solid #444; border-left: none;
+      background: rgba(18, 18, 30, 0.65); color: #ff9f43;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.15); border-left: none;
       border-radius: 0 8px 8px 0;
       font-size: 14px; font-weight: bold; cursor: pointer;
       display: flex; align-items: center; justify-content: center;
-      box-shadow: 4px 2px 10px rgba(0,0,0,0.4);
-      transition: background 0.15s, color 0.15s;
+      box-shadow: 4px 2px 12px rgba(0,0,0,0.4);
+      transition: background 0.2s, color 0.2s, border-color 0.2s;
     }
     #toggle-panel-btn:hover {
-      background: #2f3542; color: #fff;
+      background: rgba(47, 53, 66, 0.90); color: #fff;
+      border-color: rgba(255, 255, 255, 0.3);
     }
 
-    h2 { margin: 0 0 10px 0; font-size: 18px; color: #ff9f43; }
+    h2 { margin: 0 0 10px 0; font-size: 18px; color: #ff9f43; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
     .control-group { margin-bottom: 10px; }
     select, button {
       padding: 8px 10px; margin: 3px 2px; border-radius: 6px; border: none;
-      font-weight: 600; cursor: pointer; font-size: 13px; transition: background 0.15s;
+      font-weight: 600; cursor: pointer; font-size: 13px;
+      transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
     }
-    select { width: 100%; background: #2f3542; color: #fff; }
-    .btn-restart { background: #57606f; color: white; width: 100%; }
-    .btn-restart:hover { background: #747d8c; }
+    .control-group label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: #e0e0e0;
+      letter-spacing: 0.2px;
+    }
+    #level-select {
+      width: 100%;
+      background: rgba(26, 28, 44, 0.85);
+      color: #f1f2f6;
+      border: 1px solid rgba(255, 255, 255, 0.20);
+      border-radius: 8px;
+      padding: 9px 34px 9px 12px;
+      font-size: 13.5px;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+      cursor: pointer;
+      outline: none;
+      box-sizing: border-box;
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23ff9f43' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      background-size: 15px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      transition: all 0.2s ease;
+    }
+    #level-select:hover {
+      background-color: rgba(36, 40, 62, 0.95);
+      border-color: rgba(255, 159, 67, 0.6);
+      box-shadow: 0 3px 12px rgba(255, 159, 67, 0.2);
+    }
+    #level-select:focus {
+      border-color: #ff9f43;
+      box-shadow: 0 0 0 2px rgba(255, 159, 67, 0.25);
+    }
+    #level-select option {
+      background: #161824;
+      color: #fff;
+      padding: 8px 12px;
+      font-size: 13px;
+      font-weight: 500;
+    }
+    #level-select optgroup {
+      background: #0d0f17;
+      color: #ff9f43;
+      font-weight: 700;
+      font-size: 12px;
+      padding: 6px 4px;
+    }
+    #level-subtitle {
+      margin-top: 5px;
+      font-size: 11.5px;
+      color: #ffbe76;
+      font-style: italic;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      min-height: 16px;
+    }
+    .btn-restart {
+      background: rgba(87, 96, 111, 0.80);
+      color: white; width: 100%;
+      border: 1px solid rgba(255, 255, 255, 0.10);
+    }
+    .btn-restart:hover {
+      background: rgba(116, 125, 140, 0.95);
+    }
     .solver-grid {
       display: flex; flex-wrap: wrap; justify-content: space-between; margin-top: 4px;
     }
-    .btn-solver { background: #1e90ff; color: white; width: 48%; }
-    .btn-solver:hover { background: #3742fa; }
-    .btn-solver-full { width: 100%; background: #00a8ff; }
-    .btn-solver-full:hover { background: #0097e6; }
+    .btn-solver {
+      background: rgba(30, 144, 255, 0.80);
+      color: white; width: 48%;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+    .btn-solver:hover {
+      background: rgba(55, 66, 250, 0.95);
+      box-shadow: 0 0 10px rgba(55, 66, 250, 0.5);
+    }
+    .btn-solver-full {
+      width: 100%;
+      background: rgba(0, 168, 255, 0.80);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+    .btn-solver-full:hover {
+      background: rgba(0, 151, 230, 0.95);
+      box-shadow: 0 0 10px rgba(0, 168, 255, 0.5);
+    }
     #stats {
-      margin-top: 8px; padding: 10px; background: rgba(0,0,0,0.45);
-      border-radius: 6px; font-size: 13px; line-height: 1.55;
+      margin-top: 8px; padding: 10px;
+      background: rgba(0, 0, 0, 0.30);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px; font-size: 13px; line-height: 1.55;
     }
 
     /* Thanh chú thích & hướng dẫn phím nhỏ gọn ở đáy màn hình */
     #bottom-bar {
       position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%);
-      z-index: 10; background: rgba(20, 20, 28, 0.85);
-      padding: 8px 16px; border-radius: 8px; border: 1px solid #444;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      z-index: 10;
+      background: rgba(18, 18, 30, 0.70);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      padding: 8px 16px; border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.45);
       display: flex; flex-wrap: wrap; gap: 10px 18px;
       align-items: center; justify-content: center;
       font-size: 12px; color: #ccc; user-select: none;
@@ -82,6 +185,7 @@
     <div class="control-group">
       <label>Chọn màn chơi (Level):</label>
       <select id="level-select" onchange="loadSelectedLevel()"></select>
+      <div id="level-subtitle"></div>
     </div>
     <div class="control-group">
       <button class="btn-restart" onclick="loadSelectedLevel()">🔄 Restart / New Game</button>
@@ -447,7 +551,7 @@
       return true;
     }
 
-    // Tự động khôi phục màn chơi và cho khối gạch rơi từ trên trời xuống ngay sau khi chết hoặc thắng
+    // Tự động khôi phục màn chơi và cho khối gạch rơi từ trên trời xuống ngay sau khi rơi thất bại
     async function autoResetCurrentLevel(statusMessage = 'Đang chơi') {
       if (!levelData) return;
       const myToken = sessionToken;
@@ -468,12 +572,84 @@
       animState = AnimState.IDLE;
     }
 
+    // Định dạng tên file màn chơi thành tiêu đề thân thiện, dễ nhìn
+    function formatLevelOption(filename) {
+      const clean = filename.replace(/\.json$/i, '');
+      const match = clean.match(/^level_(\d+)(?:_(.*))?$/i);
+      if (match) {
+        const num = match[1];
+        const extra = match[2];
+        if (extra) {
+          const extraFormatted = extra.charAt(0).toUpperCase() + extra.slice(1);
+          return `Màn ${num} (${extraFormatted})`;
+        }
+        return `Màn ${num} (Level ${num})`;
+      }
+      return clean.replace(/_/g, ' ');
+    }
+
+    // Phân nhóm độ khó các màn chơi trực quan và khoa học
+    function buildLevelOptionsHTML(levels) {
+      const groups = [
+        { label: '── Nhóm 1: Cơ bản (Basic) ──', match: (n) => n >= 1 && n <= 3 },
+        { label: '── Nhóm 2: Ô dễ vỡ (Fragile) ──', match: (n) => n >= 4 && n <= 6 },
+        { label: '── Nhóm 3: Cầu & Công tắc (Switches) ──', match: (n) => n >= 7 && n <= 9 },
+        { label: '── Nhóm 4: Tách khối (Split Switch) ──', match: (n) => n >= 10 && n <= 12 },
+        { label: '── Nhóm 5: Mở rộng Split (13 - 20) ──', match: (n) => n >= 13 && n <= 20 }
+      ];
+
+      const grouped = {};
+      const others = [];
+
+      levels.forEach(filename => {
+        const clean = filename.replace(/\.json$/i, '');
+        const m = clean.match(/^level_(\d+)/i);
+        const num = m ? parseInt(m[1], 10) : null;
+        let matchedGroup = null;
+        if (num !== null) {
+          matchedGroup = groups.find(g => g.match(num));
+        }
+        if (matchedGroup) {
+          if (!grouped[matchedGroup.label]) grouped[matchedGroup.label] = [];
+          grouped[matchedGroup.label].push(filename);
+        } else {
+          others.push(filename);
+        }
+      });
+
+      let html = '';
+      groups.forEach(g => {
+        const list = grouped[g.label];
+        if (list && list.length > 0) {
+          html += `<optgroup label="${g.label}">`;
+          list.forEach(fn => {
+            html += `<option value="${fn}">${formatLevelOption(fn)}</option>`;
+          });
+          html += `</optgroup>`;
+        }
+      });
+
+      if (others.length > 0) {
+        html += `<optgroup label="── Màn chơi khác ──">`;
+        others.forEach(fn => {
+          html += `<option value="${fn}">${formatLevelOption(fn)}</option>`;
+        });
+        html += `</optgroup>`;
+      }
+
+      return html;
+    }
+
     async function fetchLevels() {
-      const res = await fetch('/api/levels');
-      const data = await res.json();
-      const select = document.getElementById('level-select');
-      select.innerHTML = data.levels.map(l => `<option value="${l}">${l}</option>`).join('');
-      if (data.levels.length > 0) loadSelectedLevel();
+      try {
+        const res = await fetch('/api/levels');
+        const data = await res.json();
+        const select = document.getElementById('level-select');
+        select.innerHTML = buildLevelOptionsHTML(data.levels);
+        if (data.levels && data.levels.length > 0) loadSelectedLevel();
+      } catch (err) {
+        console.error('Lỗi khi tải danh sách levels:', err);
+      }
     }
 
     async function loadSelectedLevel() {
@@ -483,11 +659,24 @@
       const selectEl = document.getElementById('level-select');
       selectEl.blur();
       const filename = selectEl.value;
+      if (!filename) return;
 
-      const res = await fetch(`/api/level/${filename}`);
-      if (myToken !== sessionToken) return;
+      try {
+        const res = await fetch(`/api/level/${filename}`);
+        if (myToken !== sessionToken) return;
+        levelData = await res.json();
+      } catch (err) {
+        if (myToken !== sessionToken) return;
+        document.getElementById('status-text').innerText = '⚠️ Lỗi khi tải màn chơi';
+        return;
+      }
 
-      levelData = await res.json();
+      // Cập nhật tên chi tiết của màn chơi dưới thanh chọn
+      const subEl = document.getElementById('level-subtitle');
+      if (subEl) {
+        subEl.innerText = levelData && levelData.name ? levelData.name : '';
+      }
+
       currentState = cloneInitialState();
       moveCount = 0;
 
@@ -516,26 +705,19 @@
       }
     }
 
-    // Tạo dấu đánh dấu trực quan (viền phát sáng + vòng sáng) cố định tại ô đích, độc lập với khối gạch
+    // Tạo dấu đánh dấu trực quan (viền phát sáng + vòng sáng) cố định tại ô đích, trong suốt nhìn xuyên qua
     function createGoalMarker(r, c) {
       const goalMarkerGroup = new THREE.Group();
       goalMarkerGroup.position.set(c, 0, r);
 
-      // 1. Đáy hố đích màu tối kèm viền phát sáng dưới đáy
-      const holeMat = new THREE.MeshBasicMaterial({ color: 0x090d16 });
-      const holeMesh = new THREE.Mesh(new THREE.BoxGeometry(0.94, 0.04, 0.94), holeMat);
-      holeMesh.position.set(0, -0.09, 0);
-      addEdges(holeMesh, 0x00ffc8);
-      goalMarkerGroup.add(holeMesh);
-
-      // 2. Khung viền phát sáng ở cao độ mặt sàn (giúp nhận diện rõ cả khi đích nằm ngoài rìa bản đồ)
+      // 1. Khung viền phát sáng ở cao độ mặt sàn (giúp nhận diện rõ cả khi đích nằm ngoài rìa bản đồ)
       const frameEdges = new THREE.EdgesGeometry(new THREE.BoxGeometry(TILE_SIZE, TILE_HEIGHT, TILE_SIZE));
       const frameMat = new THREE.LineBasicMaterial({ color: 0x00ffc8, linewidth: 2 });
       const frameWire = new THREE.LineSegments(frameEdges, frameMat);
       frameWire.position.set(0, 0, 0);
       goalMarkerGroup.add(frameWire);
 
-      // 3. Vòng sáng (Glowing Ring) nằm ngay trên miệng ô đích
+      // 2. Vòng sáng (Glowing Ring) nằm ngay trên miệng ô đích
       const ringGeo = new THREE.RingGeometry(0.28, 0.42, 32);
       const ringMat = new THREE.MeshBasicMaterial({
         color: 0x00ffc8,
@@ -1226,6 +1408,7 @@
       document.getElementById('status-text').innerText = '❌ ' + reasonText;
 
       if (!['UP', 'DOWN', 'LEFT', 'RIGHT'].includes(action)) {
+        await autoResetCurrentLevel('Đang chơi');
         return;
       }
 
@@ -1332,15 +1515,16 @@
 
         let okRoll;
         if (mode === 'tip') {
-          // Lăn đến nơi vẫn còn chút vận tốc góc để chuyển động nối tiếp tự nhiên sang giai đoạn nghiêng
+          // TH1: Đang đứng thẳng cách vực 1 ô, lăn sang trạng thái nằm (200ms đồng bộ tốc độ lăn thường) rồi mới nghiêng rơi
           const T = 200, wEnd = TIP_START_OMEGA;
           const m = wEnd * (T / 1000) / (Math.PI / 2);
-          okRoll = await runTween(T / FALL_SPEED, (p) => {
+          okRoll = await runTween(T, (p) => {
             const sCurve = (m - 2) * p * p * p + (3 - m) * p * p;
             rollPivot.rotation[axis] = targetAngle * sCurve;
           }, myToken);
         } else {
-          okRoll = await runTween(190 / FALL_SPEED, (p) => {
+          // TH2: Đang nằm lăn đến ô dễ vỡ, chuyển trạng thái từ nằm sang đứng (200ms đồng bộ tốc độ lăn thường) rồi vỡ rơi
+          okRoll = await runTween(200, (p) => {
             rollPivot.rotation[axis] = targetAngle * easeInOutQuad(p);
           }, myToken);
         }
@@ -1393,10 +1577,10 @@
 
       // Xóa khối vừa rơi khỏi tầm nhìn và thả khối mới từ trên trời xuống tại ô bắt đầu
       cleanupTiles();
-      await autoResetCurrentLevel('Đang chơi (Đã tự động đặt lại sau khi rơi)');
+      await autoResetCurrentLevel('Đang chơi');
     }
 
-    // Hoạt ảnh chiến thắng (VICTORY_FALLING), sau đó thả khối mới từ trên trời xuống
+    // Hoạt ảnh chiến thắng (VICTORY_FALLING), sau đó giữ nguyên trạng thái kết thúc và số bước
     async function animateVictory(statusMessage) {
       if (!currentState || !currentState.is_goal) return;
       animState = AnimState.VICTORY_FALLING;
@@ -1431,9 +1615,11 @@
       }, myToken);
       if (!okFall) return;
 
-      // Xóa hoàn toàn mô hình khối tại ô đích và thả khối mới từ trên trời xuống
+      // Xóa mô hình khối đã rơi vào hố đích và giữ nguyên trạng thái kết thúc
       blockGroup.clear();
-      await autoResetCurrentLevel(`${statusMessage} — Đã tự động bắt đầu lại`);
+      isSolverRunning = false;
+      animState = AnimState.IDLE;
+      document.getElementById('status-text').innerText = statusMessage;
     }
 
     // Xử lý tuần tự hàng đợi di chuyển của người chơi
@@ -1531,18 +1717,27 @@
       const filename = document.getElementById('level-select').value;
       document.getElementById('status-text').innerText = `⏳ Đang giải bằng ${algo.toUpperCase()}...`;
 
-      const res = await fetch('/api/solve', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ level: filename, algo })
-      });
-      const data = await res.json();
+      let res, data;
+      try {
+        res = await fetch('/api/solve', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ level: filename, algo })
+        });
+        data = await res.json();
+      } catch (err) {
+        if (myToken !== sessionToken) return;
+        isSolverRunning = false;
+        animState = AnimState.IDLE;
+        document.getElementById('status-text').innerText = '⚠️ Lỗi kết nối máy chủ';
+        return;
+      }
       if (myToken !== sessionToken) return;
 
       if (!res.ok) {
         isSolverRunning = false;
         animState = AnimState.IDLE;
-        alert(data.error);
+        alert(data && data.error ? data.error : 'Có lỗi khi chạy thuật toán');
         document.getElementById('status-text').innerText = '⚠️ Chưa cài đặt thuật toán này';
         return;
       }

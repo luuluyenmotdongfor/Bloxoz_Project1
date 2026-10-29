@@ -11,6 +11,7 @@ class DFSSolver(BaseSolver):
         
         while frontier:
             cur_state, path = frontier.pop()
+            self.expanded_nodes += 1
 
             if self.board.is_goal(cur_state):
                 return path
