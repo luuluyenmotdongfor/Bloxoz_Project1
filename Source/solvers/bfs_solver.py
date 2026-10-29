@@ -11,6 +11,8 @@ class BFSSolver(BaseSolver):
         visited = {start_state}
 
         while frontier:
+            if self._limit_reached():
+                return None
             current_state, path = frontier.popleft()
             self.expanded_nodes += 1
 

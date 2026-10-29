@@ -1,6 +1,7 @@
 from solvers.base_solver import BaseSolver
 import heapq
 from core.state import Orientation
+from solvers.search_utils import get_step_cost
 class UCSSolver(BaseSolver):
 
 
@@ -17,17 +18,19 @@ class UCSSolver(BaseSolver):
             if current_state in visited:
                 continue
             visited.add(current_state)
-            self.expanded_nodes += 1
+
 
             if self.board.is_goal(current_state):
                 return path
-
+            if self._limit_reached():
+                return None
+            self.expanded_nodes += 1
             successors = self.board.get_successors(current_state)
 
             for action, next_state in successors:
                 if next_state not in visited:
                     # Tính chi phí bước đi và tổng chi phí mới
-                    step_cost = self._get_step_cost(action, next_state)
+                    step_cost = get_step_cost(self.board, next_state)
                     new_cost = current_cost + step_cost
                     
                     heapq.heappush(frontier, (new_cost, next_state, path + [action]))
@@ -35,16 +38,3 @@ class UCSSolver(BaseSolver):
         return None
 
 
-    def _get_step_cost(self, action, next_state):
-        state_cost = 0
-        block_cost = 1
-
-        if next_state.orientation == 3:
-            state_cost += 2
-        closed_bridges = next_state.bridges_mask.count(False)
-        state_cost += closed_bridges * 0.1
-        for r, c in next_state.get_occupied_cells():
-            if self.board.grid[r][c] == 2:
-                block_cost += 2
-                break
-        return state_cost + block_cost

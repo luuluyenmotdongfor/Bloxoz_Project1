@@ -14,7 +14,9 @@ class DFSSolver(BaseSolver):
 
             if self.board.is_goal(cur_state):
                 return path
-
+            if self._limit_reached():
+                return None
+            self.expanded_nodes += 1
             for action, next_state in self.board.get_successors(cur_state):
                 if next_state not in visited:
                     visited.add(next_state)

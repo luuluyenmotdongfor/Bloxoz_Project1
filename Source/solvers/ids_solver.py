@@ -4,7 +4,7 @@ from core.state import State
 from solvers.base_solver import BaseSolver
 
 
-MAX_DEPTH = 50
+MAX_DEPTH = 100
 
 
 class IDSSolver(BaseSolver):
@@ -30,10 +30,13 @@ class IDSSolver(BaseSolver):
 
             if solution is not None:
                 return solution
+            if self.status != "UNSOLVABLE":
+                return None
             if not cutoff:
                 return None
 
         # Không tìm thấy đáp án trong giới hạn độ sâu cho phép (depth limit).
+        self.status = "DEPTH_LIMIT"
         return None
 
     def _depth_limited_search(
@@ -45,6 +48,9 @@ class IDSSolver(BaseSolver):
         path_states: Set[State],
         best_depth: Dict[State, int],
     ) -> Tuple[Optional[List[str]], bool]:
+        if self._limit_reached():
+            return None, False
+        
         if self.board.is_goal(state):
             return list(path), False
 
@@ -52,16 +58,9 @@ class IDSSolver(BaseSolver):
         if previous_depth is not None and previous_depth <= current_depth:
             return None, False
 
+                
         if current_depth == depth_limit:
-            # Tiếp tục nếu không tạo thành chu trình (vòng lặp) trên đường đi hiện tại,
-            # nhưng sẽ không mở rộng (expand) nút này thêm nữa.
-            has_unvisited_successor = any(
-                next_state not in path_states
-                for _, next_state in self.board.get_successors(state)
-            )
-            if has_unvisited_successor:
-                self.expanded_nodes += 1
-            return None, has_unvisited_successor
+            return None, True
 
         best_depth[state] = current_depth
         self.expanded_nodes += 1
@@ -89,6 +88,8 @@ class IDSSolver(BaseSolver):
 
             if solution is not None:
                 return solution, False
+            if self.status != "UNSOLVABLE":
+                return None, False
             cutoff = cutoff or child_cutoff
 
         return None, cutoff
