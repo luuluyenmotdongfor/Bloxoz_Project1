@@ -1501,6 +1501,11 @@
       const action = keyMap[e.key];
       if (!action || !currentState || currentState.is_goal || isSolverRunning) return;
 
+      if (action === 'SWITCH_CUBE' && currentState.orientation !== 3) {
+        e.preventDefault();
+        return;
+      }
+
       // Chặn phím khi khối đang rơi từ trên trời xuống (SPAWNING), đang rơi vực hoặc cầu đang đóng/mở
       if (
         animState === AnimState.SPAWNING ||
@@ -1531,12 +1536,21 @@
       const filename = document.getElementById('level-select').value;
       document.getElementById('status-text').innerText = `⏳ Đang giải bằng ${algo.toUpperCase()}...`;
 
-      const res = await fetch('/api/solve', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ level: filename, algo })
-      });
-      const data = await res.json();
+      let res, data;
+      try {
+        res = await fetch('/api/solve', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ level: filename, algo })
+        });
+        data = await res.json();
+      } catch (err) {
+        if (myToken !== sessionToken) return;
+        isSolverRunning = false;
+        animState = AnimState.IDLE;
+        document.getElementById('status-text').innerText = '⚠️ Không nhận được kết quả từ server. Hãy kiểm tra Terminal.';
+        return;
+      }
       if (myToken !== sessionToken) return;
 
       if (!res.ok) {
@@ -1549,12 +1563,18 @@
 
       document.getElementById('nodes-count').innerText = data.expanded_nodes;
       document.getElementById('time-count').innerText = data.search_time_sec + ' s';
-      document.getElementById('mem-count').innerText = data.peak_memory_kb + ' KB';
+      document.getElementById('mem-count').innerText = data.peak_memory_kb + ' KiB';
 
       if (!data.solved) {
         isSolverRunning = false;
         animState = AnimState.IDLE;
-        document.getElementById('status-text').innerText = '❌ Không tìm thấy lời giải!';
+        const messages = {
+          TIME_LIMIT: '⏳ Đã hết giới hạn thời gian.',
+          NODE_LIMIT: '⏳ Đã hết giới hạn mở rộng node.',
+          DEPTH_LIMIT: '⏳ IDS đã hết giới hạn độ sâu.',
+          UNSOLVABLE: '❌ Không có lời giải.'
+        };
+        document.getElementById('status-text').innerText = messages[data.status] || '❌ Không tìm thấy lời giải!';
         return;
       }
 

@@ -22,4 +22,4 @@ class DFSSolver(BaseSolver):
                     visited.add(next_state)
                     new_path = path + [action]
                     frontier.append((next_state, new_path))
-        return path
+        return None
