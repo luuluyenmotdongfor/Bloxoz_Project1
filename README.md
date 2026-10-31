@@ -6,7 +6,7 @@
 >
 > 2. Nếu bạn dùng AI (Gemini / ChatGPT) để hỗ trợ viết code hoặc viết báo cáo, **hãy copy toàn bộ nội dung file `README.md` này gửi cho AI trước** để AI hiểu chính xác các hàm có sẵn của nhóm, tuyệt đối không tự ý sửa các file trong `Source/core/`.
 >
-> 3. **QUY TẮC GIT BẮT BUỘC:** Anh em **KHÔNG push thẳng lên nhánh `main`**. Mỗi người tự tạo branch riêng cho phần việc của mình, code và test kỹ bằng lệnh `python Source/benchmark.py`, sau đó push lên branch đó rồi báo Trưởng nhóm (hoặc thành viên khác) kiểm tra và merge vào `main`!
+> 3. **QUY TẮC GIT BẮT BUỘC:** Anh em **KHÔNG push thẳng lên nhánh `main`**. Mỗi người tự tạo branch riêng cho phần việc của mình, kiểm tra bằng lệnh `python Source/benchmark_report.py --check-only` và thử trực tiếp các chức năng vừa sửa, sau đó push lên branch đó rồi báo Trưởng nhóm (hoặc thành viên khác) kiểm tra và merge vào `main`!
 
 ---
 
@@ -94,7 +94,7 @@
 
 ## 2. TRẠNG THÁI HIỆN TẠI CỦA DỰ ÁN (NHỮNG GÌ ĐÃ XONG vs. CẦN LÀM TIẾP)
 
-Repo hiện có **Bộ khung lõi (`core/`)**, **20 màn chơi**, **5 solver BFS, DFS, IDS, UCS, A*** và **Giao diện Web 3D**. Bản sửa và benchmark phục vụ report cần được nhóm chạy kiểm tra trước khi chốt số liệu.
+Repo hiện có **Bộ khung lõi (`core/`)**, **20 màn chơi**, **5 solver BFS, DFS, IDS, UCS, A*** và **Giao diện Web 3D**. Nhóm đã chạy benchmark phục vụ report ngày 29/10/2026 trên nhánh `review/report-29oct`; các thay đổi sau đó cần được kiểm tra theo chức năng bị ảnh hưởng.
 
 | Đường dẫn File | Trạng thái | Mô tả chi tiết |
 | :--- | :---: | :--- |
@@ -105,7 +105,7 @@ Repo hiện có **Bộ khung lõi (`core/`)**, **20 màn chơi**, **5 solver BFS
 | `Source/levels/` | **20 MAP** | Level 01–12 và 13–20 (`_split`). Ba nền công tắc ở map 14–16 đã đổi thành gạch thường; vẫn cần kiểm tra khả năng tiếp cận và kích hoạt. |
 | `Source/validate_levels.py` | **ĐÃ CÀI ĐẶT** | Tìm lời giải bằng BFS; phân biệt trạng thái giới hạn với vô nghiệm và chấp nhận lời giải 0 bước. |
 | `Source/benchmark.py` | **BẢN CŨ** | Script một lần chạy; dữ liệu cũ không có thông tin máy và không đo phần khởi tạo heuristic của A*. |
-| `Source/benchmark_report.py` | **CHỜ CHẠY** | Kiểm tra nhỏ, replay lời giải, chạy lặp, đối chiếu BFS–IDS và UCS–A*, xuất CSV/JSON/LaTeX/biểu đồ vào thư mục riêng. |
+| `Source/benchmark_report.py` | **ĐÃ CHẠY** | Bộ số liệu report gồm 20 màn × 5 thuật toán × 3 lần chạy; kiểm tra lại lời giải và đối chiếu BFS–IDS, UCS–A*. |
 | `Source/solvers/bfs_solver.py` | **ĐÃ CÀI ĐẶT** | Queue, `visited`, đường đi lưu trong frontier; tối ưu số hành động. |
 | `Source/solvers/dfs_solver.py` | **ĐÃ CÀI ĐẶT** | Stack, `visited`; trả `None` khi hết frontier mà không tới đích. |
 | `Source/solvers/ids_solver.py` | **ĐÃ CÀI ĐẶT** | Lặp sâu dần, `MAX_DEPTH = 100`, `path_states` và `best_depth`; có trạng thái `DEPTH_LIMIT`. |
@@ -144,6 +144,12 @@ Chỉ chạy benchmark khi kiểm tra nhanh không có `FAIL`. `LIMIT` trong ki�
 
 Thời gian chính trong report là `total_time_sec` (khởi tạo solver + `solve()`); `search_time_sec` giữ riêng phép đo cũ. Bộ nhớ là đỉnh cấp phát Python trong cùng phạm vi, đơn vị KiB. Các phép đo bật `tracemalloc`, không dùng GPU. Giới hạn thời gian áp dụng cho `solve()`; thời gian khởi tạo được đo thêm. Chỉ lấy trung vị và vẽ những trường hợp thành công đủ số lần, không có lỗi đối chiếu; các trường hợp bị giới hạn vẫn được lưu với trạng thái tương ứng.
 
+**Dữ liệu dùng cho báo cáo ngày 29/10/2026:**
+
+* Kiểm tra ban đầu: `Source/results/report_20261029_224519_701211/`.
+* Kết quả benchmark: `Source/results/report_20261029_225013_136678/`, gồm dữ liệu từng lần chạy, bảng tổng hợp, thông tin máy, kết quả đối chiếu và các đường đi trả về.
+* File `Source/results/benchmark_results.csv` và bốn biểu đồ nằm trực tiếp trong `Source/results/` là kết quả benchmark cũ, không phải bộ số liệu dùng cho báo cáo hiện tại.
+
 ### Bước 3: Khởi chạy Giao diện Game 3D
 
 ~~~bash
@@ -174,7 +180,7 @@ Khi Terminal hiện dòng `🚀 Khởi chạy Bloxorz 3D tại địa chỉ: htt
 
 Bộ map dùng nguồn tham khảo **Damien Clarke, Bloxorz, Coolmath Games & StrategyWiki Walkthrough** và các màn mở rộng của nhóm, chia thành **5 nhóm cấu trúc**. Độ khó thực tế cần nhận xét từ kết quả đo:
 
-1. **Nhóm 1 - Cơ bản (`level_01` $\rightarrow$ `level_03`):** Chỉ gồm gạch thường (`1`), ô trống (`0`) và lỗ đích (`9`). Gồm Stage 1 gốc (7 bước), Stage 3 gốc (20 bước) và Stage 6 Labyrinth (31 bước).
+1. **Nhóm 1 - Cơ bản (`level_01` $\rightarrow$ `level_03`):** Chỉ gồm gạch thường (`1`), ô trống (`0`) và lỗ đích (`9`). Ba màn tham khảo Stage 1, Stage 3 và Stage 6 Labyrinth; kết quả BFS trên các map trong repo lần lượt là 7, 17 và 24 bước.
 
 2. **Nhóm 2 - Ô dễ vỡ Fragile Tiles (`level_04` $\rightarrow$ `level_06`):** Có thêm các ô gạch màu cam (`2` - đứng thẳng sẽ bị vỡ).
 

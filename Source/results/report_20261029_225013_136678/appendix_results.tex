@@ -1,0 +1,221 @@
+OK: thành công; T: hết thời gian; N: hết giới hạn node; D: hết giới hạn sâu; U: báo vô nghiệm; E: lỗi thực thi; I: đường đi không hợp lệ; P: chỉ thành công một phần; C: đối chiếu không khớp.
+
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabular}{llrrrrrl}
+\hline
+Level & Thuật toán & $L$ & $C$ & Nodes & ms & KiB & TT \\
+\hline
+01 & BFS & 7 & 7.000 & 48 & 2.243 & 14.910 & OK \\
+01 & DFS & 7 & 7.000 & 82 & 3.373 & 25.620 & OK \\
+01 & IDS & 7 & 7.000 & 124 & 5.609 & 11.220 & OK \\
+01 & UCS & 7 & 7.000 & 69 & 3.355 & 17.910 & OK \\
+01 & A* & 7 & 7.000 & 26 & 2.487 & 14.070 & OK \\
+02 & BFS & 17 & 17.000 & 84 & 3.351 & 22.820 & OK \\
+02 & DFS & 37 & 37.000 & 40 & 2.251 & 16.400 & OK \\
+02 & IDS & 17 & 17.000 & 1547 & 60.007 & 24.120 & OK \\
+02 & UCS & 17 & 17.000 & 88 & 4.422 & 22.300 & OK \\
+02 & A* & 17 & 17.000 & 83 & 4.681 & 25.970 & OK \\
+\hline
+\end{tabular}
+\caption{Kết quả thực nghiệm (trung vị của 3 lần chạy). Thời gian gồm khởi tạo solver và tìm kiếm; $C$ bằng chi phí nguyên chia 10.}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabular}{llrrrrrl}
+\hline
+Level & Thuật toán & $L$ & $C$ & Nodes & ms & KiB & TT \\
+\hline
+03 & BFS & 24 & 24.000 & 152 & 5.733 & 32.310 & OK \\
+03 & DFS & 66 & 66.000 & 83 & 3.199 & 34.350 & OK \\
+03 & IDS & 24 & 24.000 & 4706 & 184.822 & 36.730 & OK \\
+03 & UCS & 24 & 24.000 & 155 & 6.890 & 33.110 & OK \\
+03 & A* & 24 & 24.000 & 105 & 6.327 & 33.070 & OK \\
+04 & BFS & 20 & 38.000 & 106 & 4.081 & 29.440 & OK \\
+04 & DFS & 55 & 77.000 & 80 & 3.665 & 34.330 & OK \\
+04 & IDS & 20 & 38.000 & 1830 & 72.050 & 29.780 & OK \\
+04 & UCS & 22 & 36.000 & 109 & 5.195 & 34.810 & OK \\
+04 & A* & 22 & 36.000 & 79 & 5.117 & 31.270 & OK \\
+\hline
+\end{tabular}
+\caption{Kết quả thực nghiệm (trung vị của 3 lần chạy). Thời gian gồm khởi tạo solver và tìm kiếm; $C$ bằng chi phí nguyên chia 10.}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabular}{llrrrrrl}
+\hline
+Level & Thuật toán & $L$ & $C$ & Nodes & ms & KiB & TT \\
+\hline
+05 & BFS & 16 & 16.000 & 134 & 5.449 & 31.410 & OK \\
+05 & DFS & 52 & 58.000 & 124 & 5.259 & 37.700 & OK \\
+05 & IDS & 16 & 16.000 & 1479 & 58.117 & 30.650 & OK \\
+05 & UCS & 16 & 16.000 & 123 & 5.806 & 31.410 & OK \\
+05 & A* & 16 & 16.000 & 93 & 5.838 & 31.090 & OK \\
+06 & BFS & 8 & 12.000 & 39 & 1.602 & 11.600 & OK \\
+06 & DFS & 45 & 75.000 & 52 & 2.414 & 26.970 & OK \\
+06 & IDS & 8 & 12.000 & 139 & 6.321 & 9.780 & OK \\
+06 & UCS & 8 & 12.000 & 55 & 2.423 & 12.050 & OK \\
+06 & A* & 8 & 12.000 & 48 & 3.366 & 16.970 & OK \\
+\hline
+\end{tabular}
+\caption{Kết quả thực nghiệm (trung vị của 3 lần chạy). Thời gian gồm khởi tạo solver và tìm kiếm; $C$ bằng chi phí nguyên chia 10.}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabular}{llrrrrrl}
+\hline
+Level & Thuật toán & $L$ & $C$ & Nodes & ms & KiB & TT \\
+\hline
+07 & BFS & 19 & 19.900 & 257 & 10.308 & 50.160 & OK \\
+07 & DFS & 55 & 60.200 & 276 & 10.962 & 113.760 & OK \\
+07 & IDS & 19 & 19.900 & 7264 & 311.259 & 53.590 & OK \\
+07 & UCS & 19 & 19.900 & 279 & 13.410 & 55.330 & OK \\
+07 & A* & 19 & 19.900 & 241 & 13.457 & 52.310 & OK \\
+08 & BFS & 27 & 29.700 & 411 & 16.836 & 93.180 & OK \\
+08 & DFS & 116 & 126.800 & 363 & 14.568 & 129.900 & OK \\
+08 & IDS & 27 & 29.700 & 25405 & 1111.763 & 86.500 & OK \\
+08 & UCS & 27 & 29.700 & 446 & 20.926 & 105.160 & OK \\
+08 & A* & 27 & 29.700 & 384 & 20.146 & 104.560 & OK \\
+\hline
+\end{tabular}
+\caption{Kết quả thực nghiệm (trung vị của 3 lần chạy). Thời gian gồm khởi tạo solver và tìm kiếm; $C$ bằng chi phí nguyên chia 10.}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabular}{llrrrrrl}
+\hline
+Level & Thuật toán & $L$ & $C$ & Nodes & ms & KiB & TT \\
+\hline
+09 & BFS & 29 & 34.100 & 459 & 17.707 & 104.400 & OK \\
+09 & DFS & 146 & 168.100 & 401 & 15.248 & 153.070 & OK \\
+09 & IDS & 29 & 34.100 & 32863 & 1430.715 & 92.250 & OK \\
+09 & UCS & 29 & 34.100 & 487 & 23.336 & 111.870 & OK \\
+09 & A* & 29 & 34.100 & 401 & 20.967 & 103.780 & OK \\
+10 & BFS & 20 & 46.000 & 1022 & 47.365 & 223.110 & OK \\
+10 & DFS & 88 & 254.500 & 95 & 5.085 & 93.200 & OK \\
+10 & IDS & 20 & 46.000 & 7881 & 411.823 & 176.210 & OK \\
+10 & UCS & 20 & 44.800 & 763 & 45.878 & 246.770 & OK \\
+10 & A* & 20 & 44.800 & 596 & 41.235 & 253.120 & OK \\
+\hline
+\end{tabular}
+\caption{Kết quả thực nghiệm (trung vị của 3 lần chạy). Thời gian gồm khởi tạo solver và tìm kiếm; $C$ bằng chi phí nguyên chia 10.}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabular}{llrrrrrl}
+\hline
+Level & Thuật toán & $L$ & $C$ & Nodes & ms & KiB & TT \\
+\hline
+11 & BFS & 22 & 50.100 & 1353 & 62.815 & 357.700 & OK \\
+11 & DFS & 90 & 265.200 & 167 & 7.303 & 110.940 & OK \\
+11 & IDS & 22 & 50.100 & 15068 & 787.647 & 218.580 & OK \\
+11 & UCS & 22 & 48.700 & 869 & 52.459 & 274.380 & OK \\
+11 & A* & 22 & 48.700 & 657 & 45.139 & 268.830 & OK \\
+12 & BFS & 26 & 58.500 & 2162 & 101.133 & 484.800 & OK \\
+12 & DFS & 105 & 290.200 & 115 & 5.552 & 105.200 & OK \\
+12 & IDS & 26 & 58.500 & 41261 & 2220.337 & 359.390 & OK \\
+12 & UCS & 26 & 56.700 & 1338 & 78.414 & 437.330 & OK \\
+12 & A* & 26 & 56.700 & 1173 & 77.433 & 318.090 & OK \\
+\hline
+\end{tabular}
+\caption{Kết quả thực nghiệm (trung vị của 3 lần chạy). Thời gian gồm khởi tạo solver và tìm kiếm; $C$ bằng chi phí nguyên chia 10.}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabular}{llrrrrrl}
+\hline
+Level & Thuật toán & $L$ & $C$ & Nodes & ms & KiB & TT \\
+\hline
+13 & BFS & 15 & 19.600 & 1084 & 50.085 & 357.910 & OK \\
+13 & DFS & 162 & 499.800 & 3050 & 157.397 & 5749.600 & OK \\
+13 & IDS & 15 & 19.600 & 6875 & 360.504 & 181.230 & OK \\
+13 & UCS & 15 & 19.600 & 221 & 11.147 & 69.420 & OK \\
+13 & A* & 15 & 19.600 & 126 & 7.457 & 46.410 & OK \\
+14 & BFS & 17 & 36.400 & 707 & 33.502 & 167.870 & OK \\
+14 & DFS & 115 & 201.200 & 1220 & 57.209 & 911.330 & OK \\
+14 & IDS & 17 & 36.400 & 5018 & 254.100 & 149.520 & OK \\
+14 & UCS & 17 & 36.400 & 574 & 35.249 & 200.520 & OK \\
+14 & A* & 17 & 36.400 & 525 & 37.625 & 209.120 & OK \\
+\hline
+\end{tabular}
+\caption{Kết quả thực nghiệm (trung vị của 3 lần chạy). Thời gian gồm khởi tạo solver và tìm kiếm; $C$ bằng chi phí nguyên chia 10.}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabular}{llrrrrrl}
+\hline
+Level & Thuật toán & $L$ & $C$ & Nodes & ms & KiB & TT \\
+\hline
+15 & BFS & 13 & 15.800 & 795 & 39.616 & 227.440 & OK \\
+15 & DFS & 63 & 144.800 & 65 & 3.542 & 46.610 & OK \\
+15 & IDS & 13 & 15.800 & 3850 & 194.188 & 147.000 & OK \\
+15 & UCS & 13 & 15.800 & 222 & 10.658 & 62.880 & OK \\
+15 & A* & 13 & 15.800 & 174 & 9.959 & 56.590 & OK \\
+16 & BFS & 9 & 12.800 & 319 & 16.289 & 128.710 & OK \\
+16 & DFS & 399 & 1241.100 & 24185 & 1961.047 & 135040.230 & OK \\
+16 & IDS & 9 & 12.800 & 834 & 43.077 & 54.700 & OK \\
+16 & UCS & 9 & 10.800 & 132 & 7.183 & 49.800 & OK \\
+16 & A* & 9 & 10.800 & 55 & 4.344 & 26.370 & OK \\
+\hline
+\end{tabular}
+\caption{Kết quả thực nghiệm (trung vị của 3 lần chạy). Thời gian gồm khởi tạo solver và tìm kiếm; $C$ bằng chi phí nguyên chia 10.}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabular}{llrrrrrl}
+\hline
+Level & Thuật toán & $L$ & $C$ & Nodes & ms & KiB & TT \\
+\hline
+17 & BFS & 9 & 9.400 & 140 & 6.472 & 46.920 & OK \\
+17 & DFS & 61 & 158.900 & 61 & 3.068 & 45.040 & OK \\
+17 & IDS & 9 & 9.400 & 334 & 15.914 & 26.920 & OK \\
+17 & UCS & 9 & 9.400 & 32 & 2.155 & 12.050 & OK \\
+17 & A* & 9 & 9.400 & 21 & 1.578 & 10.400 & OK \\
+18 & BFS & 11 & 11.500 & 298 & 13.658 & 97.200 & OK \\
+18 & DFS & 77 & 201.600 & 82 & 3.713 & 53.710 & OK \\
+18 & IDS & 11 & 11.500 & 1010 & 48.601 & 51.720 & OK \\
+18 & UCS & 11 & 11.500 & 55 & 3.025 & 19.160 & OK \\
+18 & A* & 11 & 11.500 & 37 & 2.945 & 15.480 & OK \\
+\hline
+\end{tabular}
+\caption{Kết quả thực nghiệm (trung vị của 3 lần chạy). Thời gian gồm khởi tạo solver và tìm kiếm; $C$ bằng chi phí nguyên chia 10.}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabular}{llrrrrrl}
+\hline
+Level & Thuật toán & $L$ & $C$ & Nodes & ms & KiB & TT \\
+\hline
+19 & BFS & 14 & 20.600 & 809 & 37.083 & 198.090 & OK \\
+19 & DFS & 220 & 705.300 & 366 & 16.865 & 404.530 & OK \\
+19 & IDS & 14 & 20.600 & 4906 & 249.619 & 146.910 & OK \\
+19 & UCS & 14 & 16.500 & 155 & 7.845 & 47.910 & OK \\
+19 & A* & 14 & 16.500 & 114 & 6.559 & 42.440 & OK \\
+20 & BFS & 12 & 15.900 & 660 & 31.225 & 194.420 & OK \\
+20 & DFS & 75 & 206.600 & 75 & 4.219 & 69.430 & OK \\
+20 & IDS & 12 & 15.900 & 2532 & 126.069 & 106.700 & OK \\
+20 & UCS & 12 & 15.900 & 160 & 7.724 & 51.060 & OK \\
+20 & A* & 12 & 15.900 & 110 & 6.262 & 39.400 & OK \\
+\hline
+\end{tabular}
+\caption{Kết quả thực nghiệm (trung vị của 3 lần chạy). Thời gian gồm khởi tạo solver và tìm kiếm; $C$ bằng chi phí nguyên chia 10.}
+\end{table}
