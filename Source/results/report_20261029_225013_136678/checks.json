@@ -1,0 +1,1762 @@
+{
+  "quick_checks": [
+    {
+      "case": "already_at_goal",
+      "algorithm": "BFS",
+      "status": "PASS"
+    },
+    {
+      "case": "already_at_goal",
+      "algorithm": "DFS",
+      "status": "PASS"
+    },
+    {
+      "case": "already_at_goal",
+      "algorithm": "IDS",
+      "status": "PASS"
+    },
+    {
+      "case": "already_at_goal",
+      "algorithm": "UCS",
+      "status": "PASS"
+    },
+    {
+      "case": "already_at_goal",
+      "algorithm": "A*",
+      "status": "PASS"
+    },
+    {
+      "case": "unsolvable",
+      "algorithm": "BFS",
+      "status": "PASS"
+    },
+    {
+      "case": "unsolvable",
+      "algorithm": "DFS",
+      "status": "PASS"
+    },
+    {
+      "case": "unsolvable",
+      "algorithm": "IDS",
+      "status": "PASS"
+    },
+    {
+      "case": "unsolvable",
+      "algorithm": "UCS",
+      "status": "PASS"
+    },
+    {
+      "case": "unsolvable",
+      "algorithm": "A*",
+      "status": "PASS"
+    },
+    {
+      "case": "two_moves",
+      "algorithm": "BFS",
+      "status": "PASS"
+    },
+    {
+      "case": "two_moves",
+      "algorithm": "DFS",
+      "status": "PASS"
+    },
+    {
+      "case": "two_moves",
+      "algorithm": "IDS",
+      "status": "PASS"
+    },
+    {
+      "case": "two_moves",
+      "algorithm": "UCS",
+      "status": "PASS"
+    },
+    {
+      "case": "two_moves",
+      "algorithm": "A*",
+      "status": "PASS"
+    }
+  ],
+  "maps": [],
+  "comparisons": [
+    {
+      "level": "level_01",
+      "run": 1,
+      "pair": [
+        "BFS",
+        "IDS"
+      ],
+      "metric": "solution_length",
+      "status": "PASS",
+      "values": [
+        7,
+        7
+      ]
+    },
+    {
+      "level": "level_01",
+      "run": 1,
+      "pair": [
+        "UCS",
+        "A*"
+      ],
+      "metric": "solution_cost_units",
+      "status": "PASS",
+      "values": [
+        70,
+        70
+      ]
+    },
+    {
+      "level": "level_01",
+      "run": 2,
+      "pair": [
+        "BFS",
+        "IDS"
+      ],
+      "metric": "solution_length",
+      "status": "PASS",
+      "values": [
+        7,
+        7
+      ]
+    },
+    {
+      "level": "level_01",
+      "run": 2,
+      "pair": [
+        "UCS",
+        "A*"
+      ],
+      "metric": "solution_cost_units",
+      "status": "PASS",
+      "values": [
+        70,
+        70
+      ]
+    },
+    {
+      "level": "level_01",
+      "run": 3,
+      "pair": [
+        "BFS",
+        "IDS"
+      ],
+      "metric": "solution_length",
+      "status": "PASS",
+      "values": [
+        7,
+        7
+      ]
+    },
+    {
+      "level": "level_01",
+      "run": 3,
+      "pair": [
+        "UCS",
+        "A*"
+      ],
+      "metric": "solution_cost_units",
+      "status": "PASS",
+      "values": [
+        70,
+        70
+      ]
+    },
+    {
+      "level": "level_02",
+      "run": 1,
+      "pair": [
+        "BFS",
+        "IDS"
+      ],
+      "metric": "solution_length",
+      "status": "PASS",
+      "values": [
+        17,
+        17
+      ]
+    },
+    {
+      "level": "level_02",
+      "run": 1,
+      "pair": [
+        "UCS",
+        "A*"
+      ],
+      "metric": "solution_cost_units",
+      "status": "PASS",
+      "values": [
+        170,
+        170
+      ]
+    },
+    {
+      "level": "level_02",
+      "run": 2,
+      "pair": [
+        "BFS",
+        "IDS"
+      ],
+      "metric": "solution_length",
+      "status": "PASS",
+      "values": [
+        17,
+        17
+      ]
+    },
+    {
+      "level": "level_02",
+      "run": 2,
+      "pair": [
+        "UCS",
+        "A*"
+      ],
+      "metric": "solution_cost_units",
+      "status": "PASS",
+      "values": [
+        170,
+        170
+      ]
+    },
+    {
+      "level": "level_02",
+      "run": 3,
+      "pair": [
+        "BFS",
+        "IDS"
+      ],
+      "metric": "solution_length",
+      "status": "PASS",
+      "values": [
+        17,
+        17
+      ]
+    },
+    {
+      "level": "level_02",
+      "run": 3,
+      "pair": [
+        "UCS",
+        "A*"
+      ],
+      "metric": "solution_cost_units",
+      "status": "PASS",
+      "values": [
+        170,
+        170
+      ]
+    },
+    {
+      "level": "level_03",
+      "run": 1,
+      "pair": [
+        "BFS",
+        "IDS"
+      ],
+      "metric": "solution_length",
+      "status": "PASS",
+      "values": [
+        24,
+        24
+      ]
+    },
+    {
+      "level": "level_03",
+      "run": 1,
+      "pair": [
+        "UCS",
+        "A*"
+      ],
+      "metric": "solution_cost_units",
+      "status": "PASS",
+      "values": [
+        240,
+        240
+      ]
+    },
+    {
+      "level": "level_03",
+      "run": 2,
+      "pair": [
+        "BFS",
+        "IDS"
+      ],
+      "metric": "solution_length",
+      "status": "PASS",
+      "values": [
+        24,
+        24
+      ]
+    },
+    {
+      "level": "level_03",
+      "run": 2,
+      "pair": [
+        "UCS",
+        "A*"
+      ],
+      "metric": "solution_cost_units",
+      "status": "PASS",
+      "values": [
+        240,
+        240
+      ]
+    },
+    {
+      "level": "level_03",
+      "run": 3,
+      "pair": [
+        "BFS",
+        "IDS"
+      ],
+      "metric": "solution_length",
+      "status": "PASS",
+      "values": [
+        24,
+        24
+      ]
+    },
+    {
+      "level": "level_03",
+      "run": 3,
+      "pair": [
+        "UCS",
+        "A*"
+      ],
+      "metric": "solution_cost_units",
+      "status": "PASS",
+      "values": [
+        240,
+        240
+      ]
+    },
+    {
+      "level": "level_04",
+      "run": 1,
+      "pair": [
+        "BFS",
+        "IDS"
+      ],
+      "metric": "solution_length",
+      "status": "PASS",
+      "values": [
+        20,
+        20
+      ]
+    },
+    {
+      "level": "level_04",
+      "run": 1,
+      "pair": [
+        "UCS",
+        "A*"
+      ],
+      "metric": "solution_cost_units",
+      "status": "PASS",
+      "values": [
+        360,
+        360
+      ]
+    },
+    {
+      "level": "level_04",
+      "run": 2,
+      "pair": [
+        "BFS",
+        "IDS"
+      ],
+      "metric": "solution_length",
+      "status": "PASS",
+      "values": [
+        20,
+        20
+      ]
+    },
+    {
+      "level": "level_04",
+      "run": 2,
+      "pair": [
+        "UCS",
+        "A*"
+      ],
+      "metric": "solution_cost_units",
+      "status": "PASS",
+      "values": [
+        360,
+        360
+      ]
+    },
+    {
+      "level": "level_04",
+      "run": 3,
+      "pair": [
+        "BFS",
+        "IDS"
+      ],
+      "metric": "solution_length",
+      "status": "PASS",
+      "values": [
+        20,
+        20
+      ]
+    },
+    {
+      "level": "level_04",
+      "run": 3,
+      "pair": [
+        "UCS",
+        "A*"
+      ],
+      "metric": "solution_cost_units",
+      "status": "PASS",
+      "values": [
+        360,
+        360
+      ]
+    },
+    {
+      "level": "level_05",
+      "run": 1,
+      "pair": [
+        "BFS",
+        "IDS"
+      ],
+      "metric": "solution_length",
+      "status": "PASS",
+      "values": [
+        16,
+        16
+      ]
+    },
+    {
+      "level": "level_05",
+      "run": 1,
+      "pair": [
+        "UCS",
+        "A*"
+      ],
+      "metric": "solution_cost_units",
+      "status": "PASS",
+      "values": [
+        160,
+        160
+      ]
+    },
+    {
+      "level": "level_05",
+      "run": 2,
+      "pair": [
+        "BFS",
+        "IDS"
+      ],
+      "metric": "solution_length",
+      "status": "PASS",
+      "values": [
+        16,
+        16
+      ]
+    },
+    {
+      "level": "level_05",
+      "run": 2,
+      "pair": [
+        "UCS",
+        "A*"
+      ],
+      "metric": "solution_cost_units",
+      "status": "PASS",
+      "values": [
+        160,
+        160
+      ]
+    },
+    {
+      "level": "level_05",
+      "run": 3,
+      "pair": [
+        "BFS",
+        "IDS"
+      ],
+      "metric": "solution_length",
+      "status": "PASS",
+      "values": [
+        16,
+        16
+      ]
+    },
+    {
+      "level": "level_05",
+      "run": 3,
+      "pair": [
+        "UCS",
+        "A*"
+      ],
+      "metric": "solution_cost_units",
+      "status": "PASS",
+      "values": [
+        160,
+        160
+      ]
+    },
+    {
+      "level": "level_06",
+      "run": 1,
+      "pair": [
+        "BFS",
+        "IDS"
+      ],
+      "metric": "solution_length",
+      "status": "PASS",
+      "values": [
+        8,
+        8
+      ]
+    },
+    {
+      "level": "level_06",
+      "run": 1,
+      "pair": [
+        "UCS",
+        "A*"
+      ],
+      "metric": "solution_cost_units",
+      "status": "PASS",
+      "values": [
+        120,
+        120
+      ]
+    },
+    {
+      "level": "level_06",
+      "run": 2,
+      "pair": [
+        "BFS",
+        "IDS"
+      ],
+      "metric": "solution_length",
+      "status": "PASS",
+      "values": [
+        8,
+        8
+      ]
+    },
+    {
+      "level": "level_06",
+      "run": 2,
+      "pair": [
+        "UCS",
+        "A*"
+      ],
+      "metric": "solution_cost_units",
+      "status": "PASS",
+      "values": [
+        120,
+        120
+      ]
+    },
+    {
+      "level": "level_06",
+      "run": 3,
+      "pair": [
+        "BFS",
+        "IDS"
+      ],
+      "metric": "solution_length",
+      "status": "PASS",
+      "values": [
+        8,
+        8
+      ]
+    },
+    {
+      "level": "level_06",
+      "run": 3,
+      "pair": [
+        "UCS",
+        "A*"
+      ],
+      "metric": "solution_cost_units",
+      "status": "PASS",
+      "values": [
+        120,
+        120
+      ]
+    },
+    {
+      "level": "level_07",
+      "run": 1,
+      "pair": [
+        "BFS",
+        "IDS"
+      ],
+      "metric": "solution_length",
+      "status": "PASS",
+      "values": [
+        19,
+        19
+      ]
+    },
+    {
+      "level": "level_07",
+      "run": 1,
+      "pair": [
+        "UCS",
+        "A*"
+      ],
+      "metric": "solution_cost_units",
+      "status": "PASS",
+      "values": [
+        199,
+        199
+      ]
+    },
+    {
+      "level": "level_07",
+      "run": 2,
+      "pair": [
+        "BFS",
+        "IDS"
+      ],
+      "metric": "solution_length",
+      "status": "PASS",
+      "values": [
+        19,
+        19
+      ]
+    },
+    {
+      "level": "level_07",
+      "run": 2,
+      "pair": [
+        "UCS",
+        "A*"
+      ],
+      "metric": "solution_cost_units",
+      "status": "PASS",
+      "values": [
+        199,
+        199
+      ]
+    },
+    {
+      "level": "level_07",
+      "run": 3,
+      "pair": [
+        "BFS",
+        "IDS"
+      ],
+      "metric": "solution_length",
+      "status": "PASS",
+      "values": [
+        19,
+        19
+      ]
+    },
+    {
+      "level": "level_07",
+      "run": 3,
+      "pair": [
+        "UCS",
+        "A*"
+      ],
+      "metric": "solution_cost_units",
+      "status": "PASS",
+      "values": [
+        199,
+        199
+      ]
+    },
+    {
+      "level": "level_08",
+      "run": 1,
+      "pair": [
+        "BFS",
+        "IDS"
+      ],
+      "metric": "solution_length",
+      "status": "PASS",
+      "values": [
+        27,
+        27
+      ]
+    },
+    {
+      "level": "level_08",
+      "run": 1,
+      "pair": [
+        "UCS",
+        "A*"
+      ],
+      "metric": "solution_cost_units",
+      "status": "PASS",
+      "values": [
+        297,
+        297
+      ]
+    },
+    {
+      "level": "level_08",
+      "run": 2,
+      "pair": [
+        "BFS",
+        "IDS"
+      ],
+      "metric": "solution_length",
+      "status": "PASS",
+      "values": [
+        27,
+        27
+      ]
+    },
+    {
+      "level": "level_08",
+      "run": 2,
+      "pair": [
+        "UCS",
+        "A*"
+      ],
+      "metric": "solution_cost_units",
+      "status": "PASS",
+      "values": [
+        297,
+        297
+      ]
+    },
+    {
+      "level": "level_08",
+      "run": 3,
+      "pair": [
+        "BFS",
+        "IDS"
+      ],
+      "metric": "solution_length",
+      "status": "PASS",
+      "values": [
+        27,
+        27
+      ]
+    },
+    {
+      "level": "level_08",
+      "run": 3,
+      "pair": [
+        "UCS",
+        "A*"
+      ],
+      "metric": "solution_cost_units",
+      "status": "PASS",
+      "values": [
+        297,
+        297
+      ]
+    },
+    {
+      "level": "level_09",
+      "run": 1,
+      "pair": [
+        "BFS",
+        "IDS"
+      ],
+      "metric": "solution_length",
+      "status": "PASS",
+      "values": [
+        29,
+        29
+      ]
+    },
+    {
+      "level": "level_09",
+      "run": 1,
+      "pair": [
+        "UCS",
+        "A*"
+      ],
+      "metric": "solution_cost_units",
+      "status": "PASS",
+      "values": [
+        341,
+        341
+      ]
+    },
+    {
+      "level": "level_09",
+      "run": 2,
+      "pair": [
+        "BFS",
+        "IDS"
+      ],
+      "metric": "solution_length",
+      "status": "PASS",
+      "values": [
+        29,
+        29
+      ]
+    },
+    {
+      "level": "level_09",
+      "run": 2,
+      "pair": [
+        "UCS",
+        "A*"
+      ],
+      "metric": "solution_cost_units",
+      "status": "PASS",
+      "values": [
+        341,
+        341
+      ]
+    },
+    {
+      "level": "level_09",
+      "run": 3,
+      "pair": [
+        "BFS",
+        "IDS"
+      ],
+      "metric": "solution_length",
+      "status": "PASS",
+      "values": [
+        29,
+        29
+      ]
+    },
+    {
+      "level": "level_09",
+      "run": 3,
+      "pair": [
+        "UCS",
+        "A*"
+      ],
+      "metric": "solution_cost_units",
+      "status": "PASS",
+      "values": [
+        341,
+        341
+      ]
+    },
+    {
+      "level": "level_10",
+      "run": 1,
+      "pair": [
+        "BFS",
+        "IDS"
+      ],
+      "metric": "solution_length",
+      "status": "PASS",
+      "values": [
+        20,
+        20
+      ]
+    },
+    {
+      "level": "level_10",
+      "run": 1,
+      "pair": [
+        "UCS",
+        "A*"
+      ],
+      "metric": "solution_cost_units",
+      "status": "PASS",
+      "values": [
+        448,
+        448
+      ]
+    },
+    {
+      "level": "level_10",
+      "run": 2,
+      "pair": [
+        "BFS",
+        "IDS"
+      ],
+      "metric": "solution_length",
+      "status": "PASS",
+      "values": [
+        20,
+        20
+      ]
+    },
+    {
+      "level": "level_10",
+      "run": 2,
+      "pair": [
+        "UCS",
+        "A*"
+      ],
+      "metric": "solution_cost_units",
+      "status": "PASS",
+      "values": [
+        448,
+        448
+      ]
+    },
+    {
+      "level": "level_10",
+      "run": 3,
+      "pair": [
+        "BFS",
+        "IDS"
+      ],
+      "metric": "solution_length",
+      "status": "PASS",
+      "values": [
+        20,
+        20
+      ]
+    },
+    {
+      "level": "level_10",
+      "run": 3,
+      "pair": [
+        "UCS",
+        "A*"
+      ],
+      "metric": "solution_cost_units",
+      "status": "PASS",
+      "values": [
+        448,
+        448
+      ]
+    },
+    {
+      "level": "level_11",
+      "run": 1,
+      "pair": [
+        "BFS",
+        "IDS"
+      ],
+      "metric": "solution_length",
+      "status": "PASS",
+      "values": [
+        22,
+        22
+      ]
+    },
+    {
+      "level": "level_11",
+      "run": 1,
+      "pair": [
+        "UCS",
+        "A*"
+      ],
+      "metric": "solution_cost_units",
+      "status": "PASS",
+      "values": [
+        487,
+        487
+      ]
+    },
+    {
+      "level": "level_11",
+      "run": 2,
+      "pair": [
+        "BFS",
+        "IDS"
+      ],
+      "metric": "solution_length",
+      "status": "PASS",
+      "values": [
+        22,
+        22
+      ]
+    },
+    {
+      "level": "level_11",
+      "run": 2,
+      "pair": [
+        "UCS",
+        "A*"
+      ],
+      "metric": "solution_cost_units",
+      "status": "PASS",
+      "values": [
+        487,
+        487
+      ]
+    },
+    {
+      "level": "level_11",
+      "run": 3,
+      "pair": [
+        "BFS",
+        "IDS"
+      ],
+      "metric": "solution_length",
+      "status": "PASS",
+      "values": [
+        22,
+        22
+      ]
+    },
+    {
+      "level": "level_11",
+      "run": 3,
+      "pair": [
+        "UCS",
+        "A*"
+      ],
+      "metric": "solution_cost_units",
+      "status": "PASS",
+      "values": [
+        487,
+        487
+      ]
+    },
+    {
+      "level": "level_12",
+      "run": 1,
+      "pair": [
+        "BFS",
+        "IDS"
+      ],
+      "metric": "solution_length",
+      "status": "PASS",
+      "values": [
+        26,
+        26
+      ]
+    },
+    {
+      "level": "level_12",
+      "run": 1,
+      "pair": [
+        "UCS",
+        "A*"
+      ],
+      "metric": "solution_cost_units",
+      "status": "PASS",
+      "values": [
+        567,
+        567
+      ]
+    },
+    {
+      "level": "level_12",
+      "run": 2,
+      "pair": [
+        "BFS",
+        "IDS"
+      ],
+      "metric": "solution_length",
+      "status": "PASS",
+      "values": [
+        26,
+        26
+      ]
+    },
+    {
+      "level": "level_12",
+      "run": 2,
+      "pair": [
+        "UCS",
+        "A*"
+      ],
+      "metric": "solution_cost_units",
+      "status": "PASS",
+      "values": [
+        567,
+        567
+      ]
+    },
+    {
+      "level": "level_12",
+      "run": 3,
+      "pair": [
+        "BFS",
+        "IDS"
+      ],
+      "metric": "solution_length",
+      "status": "PASS",
+      "values": [
+        26,
+        26
+      ]
+    },
+    {
+      "level": "level_12",
+      "run": 3,
+      "pair": [
+        "UCS",
+        "A*"
+      ],
+      "metric": "solution_cost_units",
+      "status": "PASS",
+      "values": [
+        567,
+        567
+      ]
+    },
+    {
+      "level": "level_13_split",
+      "run": 1,
+      "pair": [
+        "BFS",
+        "IDS"
+      ],
+      "metric": "solution_length",
+      "status": "PASS",
+      "values": [
+        15,
+        15
+      ]
+    },
+    {
+      "level": "level_13_split",
+      "run": 1,
+      "pair": [
+        "UCS",
+        "A*"
+      ],
+      "metric": "solution_cost_units",
+      "status": "PASS",
+      "values": [
+        196,
+        196
+      ]
+    },
+    {
+      "level": "level_13_split",
+      "run": 2,
+      "pair": [
+        "BFS",
+        "IDS"
+      ],
+      "metric": "solution_length",
+      "status": "PASS",
+      "values": [
+        15,
+        15
+      ]
+    },
+    {
+      "level": "level_13_split",
+      "run": 2,
+      "pair": [
+        "UCS",
+        "A*"
+      ],
+      "metric": "solution_cost_units",
+      "status": "PASS",
+      "values": [
+        196,
+        196
+      ]
+    },
+    {
+      "level": "level_13_split",
+      "run": 3,
+      "pair": [
+        "BFS",
+        "IDS"
+      ],
+      "metric": "solution_length",
+      "status": "PASS",
+      "values": [
+        15,
+        15
+      ]
+    },
+    {
+      "level": "level_13_split",
+      "run": 3,
+      "pair": [
+        "UCS",
+        "A*"
+      ],
+      "metric": "solution_cost_units",
+      "status": "PASS",
+      "values": [
+        196,
+        196
+      ]
+    },
+    {
+      "level": "level_14_split",
+      "run": 1,
+      "pair": [
+        "BFS",
+        "IDS"
+      ],
+      "metric": "solution_length",
+      "status": "PASS",
+      "values": [
+        17,
+        17
+      ]
+    },
+    {
+      "level": "level_14_split",
+      "run": 1,
+      "pair": [
+        "UCS",
+        "A*"
+      ],
+      "metric": "solution_cost_units",
+      "status": "PASS",
+      "values": [
+        364,
+        364
+      ]
+    },
+    {
+      "level": "level_14_split",
+      "run": 2,
+      "pair": [
+        "BFS",
+        "IDS"
+      ],
+      "metric": "solution_length",
+      "status": "PASS",
+      "values": [
+        17,
+        17
+      ]
+    },
+    {
+      "level": "level_14_split",
+      "run": 2,
+      "pair": [
+        "UCS",
+        "A*"
+      ],
+      "metric": "solution_cost_units",
+      "status": "PASS",
+      "values": [
+        364,
+        364
+      ]
+    },
+    {
+      "level": "level_14_split",
+      "run": 3,
+      "pair": [
+        "BFS",
+        "IDS"
+      ],
+      "metric": "solution_length",
+      "status": "PASS",
+      "values": [
+        17,
+        17
+      ]
+    },
+    {
+      "level": "level_14_split",
+      "run": 3,
+      "pair": [
+        "UCS",
+        "A*"
+      ],
+      "metric": "solution_cost_units",
+      "status": "PASS",
+      "values": [
+        364,
+        364
+      ]
+    },
+    {
+      "level": "level_15_split",
+      "run": 1,
+      "pair": [
+        "BFS",
+        "IDS"
+      ],
+      "metric": "solution_length",
+      "status": "PASS",
+      "values": [
+        13,
+        13
+      ]
+    },
+    {
+      "level": "level_15_split",
+      "run": 1,
+      "pair": [
+        "UCS",
+        "A*"
+      ],
+      "metric": "solution_cost_units",
+      "status": "PASS",
+      "values": [
+        158,
+        158
+      ]
+    },
+    {
+      "level": "level_15_split",
+      "run": 2,
+      "pair": [
+        "BFS",
+        "IDS"
+      ],
+      "metric": "solution_length",
+      "status": "PASS",
+      "values": [
+        13,
+        13
+      ]
+    },
+    {
+      "level": "level_15_split",
+      "run": 2,
+      "pair": [
+        "UCS",
+        "A*"
+      ],
+      "metric": "solution_cost_units",
+      "status": "PASS",
+      "values": [
+        158,
+        158
+      ]
+    },
+    {
+      "level": "level_15_split",
+      "run": 3,
+      "pair": [
+        "BFS",
+        "IDS"
+      ],
+      "metric": "solution_length",
+      "status": "PASS",
+      "values": [
+        13,
+        13
+      ]
+    },
+    {
+      "level": "level_15_split",
+      "run": 3,
+      "pair": [
+        "UCS",
+        "A*"
+      ],
+      "metric": "solution_cost_units",
+      "status": "PASS",
+      "values": [
+        158,
+        158
+      ]
+    },
+    {
+      "level": "level_16_split",
+      "run": 1,
+      "pair": [
+        "BFS",
+        "IDS"
+      ],
+      "metric": "solution_length",
+      "status": "PASS",
+      "values": [
+        9,
+        9
+      ]
+    },
+    {
+      "level": "level_16_split",
+      "run": 1,
+      "pair": [
+        "UCS",
+        "A*"
+      ],
+      "metric": "solution_cost_units",
+      "status": "PASS",
+      "values": [
+        108,
+        108
+      ]
+    },
+    {
+      "level": "level_16_split",
+      "run": 2,
+      "pair": [
+        "BFS",
+        "IDS"
+      ],
+      "metric": "solution_length",
+      "status": "PASS",
+      "values": [
+        9,
+        9
+      ]
+    },
+    {
+      "level": "level_16_split",
+      "run": 2,
+      "pair": [
+        "UCS",
+        "A*"
+      ],
+      "metric": "solution_cost_units",
+      "status": "PASS",
+      "values": [
+        108,
+        108
+      ]
+    },
+    {
+      "level": "level_16_split",
+      "run": 3,
+      "pair": [
+        "BFS",
+        "IDS"
+      ],
+      "metric": "solution_length",
+      "status": "PASS",
+      "values": [
+        9,
+        9
+      ]
+    },
+    {
+      "level": "level_16_split",
+      "run": 3,
+      "pair": [
+        "UCS",
+        "A*"
+      ],
+      "metric": "solution_cost_units",
+      "status": "PASS",
+      "values": [
+        108,
+        108
+      ]
+    },
+    {
+      "level": "level_17_split",
+      "run": 1,
+      "pair": [
+        "BFS",
+        "IDS"
+      ],
+      "metric": "solution_length",
+      "status": "PASS",
+      "values": [
+        9,
+        9
+      ]
+    },
+    {
+      "level": "level_17_split",
+      "run": 1,
+      "pair": [
+        "UCS",
+        "A*"
+      ],
+      "metric": "solution_cost_units",
+      "status": "PASS",
+      "values": [
+        94,
+        94
+      ]
+    },
+    {
+      "level": "level_17_split",
+      "run": 2,
+      "pair": [
+        "BFS",
+        "IDS"
+      ],
+      "metric": "solution_length",
+      "status": "PASS",
+      "values": [
+        9,
+        9
+      ]
+    },
+    {
+      "level": "level_17_split",
+      "run": 2,
+      "pair": [
+        "UCS",
+        "A*"
+      ],
+      "metric": "solution_cost_units",
+      "status": "PASS",
+      "values": [
+        94,
+        94
+      ]
+    },
+    {
+      "level": "level_17_split",
+      "run": 3,
+      "pair": [
+        "BFS",
+        "IDS"
+      ],
+      "metric": "solution_length",
+      "status": "PASS",
+      "values": [
+        9,
+        9
+      ]
+    },
+    {
+      "level": "level_17_split",
+      "run": 3,
+      "pair": [
+        "UCS",
+        "A*"
+      ],
+      "metric": "solution_cost_units",
+      "status": "PASS",
+      "values": [
+        94,
+        94
+      ]
+    },
+    {
+      "level": "level_18_split",
+      "run": 1,
+      "pair": [
+        "BFS",
+        "IDS"
+      ],
+      "metric": "solution_length",
+      "status": "PASS",
+      "values": [
+        11,
+        11
+      ]
+    },
+    {
+      "level": "level_18_split",
+      "run": 1,
+      "pair": [
+        "UCS",
+        "A*"
+      ],
+      "metric": "solution_cost_units",
+      "status": "PASS",
+      "values": [
+        115,
+        115
+      ]
+    },
+    {
+      "level": "level_18_split",
+      "run": 2,
+      "pair": [
+        "BFS",
+        "IDS"
+      ],
+      "metric": "solution_length",
+      "status": "PASS",
+      "values": [
+        11,
+        11
+      ]
+    },
+    {
+      "level": "level_18_split",
+      "run": 2,
+      "pair": [
+        "UCS",
+        "A*"
+      ],
+      "metric": "solution_cost_units",
+      "status": "PASS",
+      "values": [
+        115,
+        115
+      ]
+    },
+    {
+      "level": "level_18_split",
+      "run": 3,
+      "pair": [
+        "BFS",
+        "IDS"
+      ],
+      "metric": "solution_length",
+      "status": "PASS",
+      "values": [
+        11,
+        11
+      ]
+    },
+    {
+      "level": "level_18_split",
+      "run": 3,
+      "pair": [
+        "UCS",
+        "A*"
+      ],
+      "metric": "solution_cost_units",
+      "status": "PASS",
+      "values": [
+        115,
+        115
+      ]
+    },
+    {
+      "level": "level_19_split",
+      "run": 1,
+      "pair": [
+        "BFS",
+        "IDS"
+      ],
+      "metric": "solution_length",
+      "status": "PASS",
+      "values": [
+        14,
+        14
+      ]
+    },
+    {
+      "level": "level_19_split",
+      "run": 1,
+      "pair": [
+        "UCS",
+        "A*"
+      ],
+      "metric": "solution_cost_units",
+      "status": "PASS",
+      "values": [
+        165,
+        165
+      ]
+    },
+    {
+      "level": "level_19_split",
+      "run": 2,
+      "pair": [
+        "BFS",
+        "IDS"
+      ],
+      "metric": "solution_length",
+      "status": "PASS",
+      "values": [
+        14,
+        14
+      ]
+    },
+    {
+      "level": "level_19_split",
+      "run": 2,
+      "pair": [
+        "UCS",
+        "A*"
+      ],
+      "metric": "solution_cost_units",
+      "status": "PASS",
+      "values": [
+        165,
+        165
+      ]
+    },
+    {
+      "level": "level_19_split",
+      "run": 3,
+      "pair": [
+        "BFS",
+        "IDS"
+      ],
+      "metric": "solution_length",
+      "status": "PASS",
+      "values": [
+        14,
+        14
+      ]
+    },
+    {
+      "level": "level_19_split",
+      "run": 3,
+      "pair": [
+        "UCS",
+        "A*"
+      ],
+      "metric": "solution_cost_units",
+      "status": "PASS",
+      "values": [
+        165,
+        165
+      ]
+    },
+    {
+      "level": "level_20_split",
+      "run": 1,
+      "pair": [
+        "BFS",
+        "IDS"
+      ],
+      "metric": "solution_length",
+      "status": "PASS",
+      "values": [
+        12,
+        12
+      ]
+    },
+    {
+      "level": "level_20_split",
+      "run": 1,
+      "pair": [
+        "UCS",
+        "A*"
+      ],
+      "metric": "solution_cost_units",
+      "status": "PASS",
+      "values": [
+        159,
+        159
+      ]
+    },
+    {
+      "level": "level_20_split",
+      "run": 2,
+      "pair": [
+        "BFS",
+        "IDS"
+      ],
+      "metric": "solution_length",
+      "status": "PASS",
+      "values": [
+        12,
+        12
+      ]
+    },
+    {
+      "level": "level_20_split",
+      "run": 2,
+      "pair": [
+        "UCS",
+        "A*"
+      ],
+      "metric": "solution_cost_units",
+      "status": "PASS",
+      "values": [
+        159,
+        159
+      ]
+    },
+    {
+      "level": "level_20_split",
+      "run": 3,
+      "pair": [
+        "BFS",
+        "IDS"
+      ],
+      "metric": "solution_length",
+      "status": "PASS",
+      "values": [
+        12,
+        12
+      ]
+    },
+    {
+      "level": "level_20_split",
+      "run": 3,
+      "pair": [
+        "UCS",
+        "A*"
+      ],
+      "metric": "solution_cost_units",
+      "status": "PASS",
+      "values": [
+        159,
+        159
+      ]
+    }
+  ]
+}

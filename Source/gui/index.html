@@ -154,6 +154,7 @@
     let animState = AnimState.IDLE;
     let activeTask = null;        // Hàm cập nhật nội suy trong vòng lặp requestAnimationFrame
     let isSolverRunning = false;
+    let isSolveRequestPending = false;
     let sessionToken = 0;         // Token định danh phiên chơi để hủy sạch hoạt ảnh cũ khi Reset
     let moveQueue = [];           // Hàng đợi thao tác di chuyển hợp lệ
     let tileMeshMap = {};         // Lưu tham chiếu mesh từng ô gạch theo tọa độ "r,c"
@@ -1226,6 +1227,7 @@
       document.getElementById('status-text').innerText = '❌ ' + reasonText;
 
       if (!['UP', 'DOWN', 'LEFT', 'RIGHT'].includes(action)) {
+        animState = AnimState.IDLE;
         return;
       }
 
@@ -1396,7 +1398,7 @@
       await autoResetCurrentLevel('Đang chơi (Đã tự động đặt lại sau khi rơi)');
     }
 
-    // Hoạt ảnh chiến thắng (VICTORY_FALLING), sau đó thả khối mới từ trên trời xuống
+    // Hoạt ảnh chiến thắng (VICTORY_FALLING), giữ nguyên kết quả khi kết thúc
     async function animateVictory(statusMessage) {
       if (!currentState || !currentState.is_goal) return;
       animState = AnimState.VICTORY_FALLING;
@@ -1431,9 +1433,11 @@
       }, myToken);
       if (!okFall) return;
 
-      // Xóa hoàn toàn mô hình khối tại ô đích và thả khối mới từ trên trời xuống
+      // Xóa mô hình khối đã rơi vào hố đích và giữ nguyên số bước
       blockGroup.clear();
-      await autoResetCurrentLevel(`${statusMessage} — Đã tự động bắt đầu lại`);
+      isSolverRunning = false;
+      animState = AnimState.IDLE;
+      document.getElementById('status-text').innerText = statusMessage;
     }
 
     // Xử lý tuần tự hàng đợi di chuyển của người chơi
@@ -1448,6 +1452,7 @@
         }
 
         const action = moveQueue.shift();
+        if (action === 'SWITCH_CUBE' && currentState.orientation !== 3) continue;
         const filename = document.getElementById('level-select').value;
         const prevState = currentState;
 
@@ -1528,6 +1533,12 @@
 
     // Chạy thuật toán tìm đường và tự động diễn hoạt từng bước về đích
     async function runSolver(algo) {
+      if (isSolveRequestPending) {
+        document.getElementById('status-text').innerText = '⏳ Đang chờ lần giải trước hoàn tất.';
+        return;
+      }
+      if (!levelData || !currentState) return;
+
       resetAnimationSystem();
       const myToken = sessionToken;
       isSolverRunning = true;
@@ -1537,6 +1548,7 @@
       document.getElementById('status-text').innerText = `⏳ Đang giải bằng ${algo.toUpperCase()}...`;
 
       let res, data;
+      isSolveRequestPending = true;
       try {
         res = await fetch('/api/solve', {
           method: 'POST',
@@ -1550,6 +1562,8 @@
         animState = AnimState.IDLE;
         document.getElementById('status-text').innerText = '⚠️ Không nhận được kết quả từ server. Hãy kiểm tra Terminal.';
         return;
+      } finally {
+        isSolveRequestPending = false;
       }
       if (myToken !== sessionToken) return;
 
